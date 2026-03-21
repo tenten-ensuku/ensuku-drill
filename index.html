@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【多面待ちドリル】</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+
+        .problem-tile-group {
+            display: flex;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+        .problem-tile-group img, .problem-tile-group .fallback-tile {
+            border-right: 1px solid #e2e8f0;
+        }
+        .problem-tile-group img:last-child, .problem-tile-group .fallback-tile:last-child {
+            border-right: none;
+        }
+
+        .rainbow-text {
+            background: linear-gradient(to right, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6, #ef4444);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: rainbow 3s linear infinite;
+        }
+        @keyframes rainbow { to { background-position: 200% center; } }
+
+        .gold-text {
+            color: #d4af37;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+        }
+
+        .record-badge {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- オーディオ制御 ---
+        const SoundEffect = {
+            ctx: null,
+            init() {
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            },
+            playCorrect() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                osc1.type = 'triangle';
+                osc1.frequency.setValueAtTime(1046.50, now);
+                gain1.gain.setValueAtTime(0.15, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc1.connect(gain1); gain1.connect(this.ctx.destination);
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(1318.51, now + 0.05);
+                gain2.gain.setValueAtTime(0, now);
+                gain2.gain.setValueAtTime(0.15, now + 0.05);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc2.connect(gain2); gain2.connect(this.ctx.destination);
+                osc1.start(now); osc1.stop(now + 0.1);
+                osc2.start(now + 0.05); osc2.stop(now + 0.2);
+            },
+            playIncorrect() {
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+            },
+            playTap() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(now); osc.stop(now + 0.05);
+            }
+        };
+
+        // --- 牌画像設定 ---
+        const SUIT_PREFIX = { m: 'man', p: 'pin', s: 'sou' };
+        const IMG_BASE = '../pai-images/pai-images/90-l/';
+        const SUITS = ['m', 'p', 's'];
+
+        // 逆順変換: n → 10-n
+        const mirror = n => 10 - n;
+
+        const parseData = (raw) =>
+            raw.trim().split('\n').filter(l => l.includes('-')).map((line, index) => {
+                const [q, a] = line.trim().split('-');
+                return {
+                    id: index,
+                    tiles: q.split('').map(Number),
+                    answers: a.split('').map(Number)
+                };
+            });
+
+        // --- 6枚系 問題データ（26問）---
+        const ALL_PROBLEMS_6 = parseData(`
+            334556-347
+            344568-257
+            223446-35
+            333445-23456
+            445678-3469
+            111233-1234
+            445567-346
+            334445-2345
+            344456-2457
+            334568-37
+            134568-27
+            344567-2458
+            234446-145
+            677899-589
+            356778-469
+            244566-35
+            566777-45678
+            345677-2578
+            445666-3456
+            345566-467
+            455566-4567
+            456667-3568
+            134566-26
+            245679-38
+            567889-478
+            133345-236
+        `);
+
+        // --- 7枚系 問題データ（19問）---
+        const ALL_PROBLEMS_7 = parseData(`
+            5556777-45678
+            2345678-258
+            2345699-147
+            2345777-256
+            2333456-1247
+            3334455-3456
+            5666777-4567
+            2456777-23
+            5566677-567
+            3345555-346
+            3455777-256
+            3334456-2457
+            3334567-24578
+            4556777-356
+            2345567-258
+            4566667-4578
+            3344445-2356
+            3335777-456
+            1166678-169
+        `);
+
+        // --- ランク定義（drillに応じた閾値）---
+        const getRankInfo = (score, drill) => {
+            if (drill === '7') {
+                if (score >= 155) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+                if (score >= 145) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+                if (score >= 135) return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                if (score >= 125) return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんの昼間の麻雀だ' };
+                if (score >= 115) return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
+                if (score >= 105) return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
+                if (score >= 95)  return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+                if (score >= 85)  return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
+                if (score >= 55)  return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
+                if (score >= 30)  return { rank: 'D',  color: 'text-black',    comment: '7枚形が仲間になりたそうにコチラを見ている' };
+                return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの7枚形のようだ。' };
+            }
+            // 6枚系
+            if (score >= 210) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+            if (score >= 200) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+            if (score >= 190) return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+            if (score >= 180) return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんの昼間の麻雀だ' };
+            if (score >= 170) return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
+            if (score >= 160) return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
+            if (score >= 150) return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+            if (score >= 140) return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
+            if (score >= 100) return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
+            if (score >= 51)  return { rank: 'D',  color: 'text-black',    comment: '6枚形が仲間になりたそうにコチラを見ている' };
+            return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの6枚形のようだ。' };
+        };
+
+        // --- 牌画像コンポーネント ---
+        const TileImage = ({ num, suit, tileCount }) => {
+            const [error, setError] = useState(false);
+            const imagePath = `${IMG_BASE}${SUIT_PREFIX[suit]}${num}-66-90-l.png`;
+            const sizeClass = tileCount >= 7 ? "h-12 sm:h-14 w-auto" : "h-14 sm:h-16 w-auto";
+
+            if (error) {
+                return (
+                    <div
+                        className={`bg-white flex items-center justify-center font-bold text-sm fallback-tile ${sizeClass}`}
+                        style={{ aspectRatio: '66/90' }}
+                    >
+                        {num}{suit}
+                    </div>
+                );
+            }
+            return (
+                <img
+                    src={imagePath}
+                    alt={`${num}${suit}`}
+                    className={`${sizeClass} block`}
+                    loading="eager"
+                    decoding="sync"
+                    onError={() => setError(true)}
+                />
+            );
+        };
+
+        // --- ベストスコア表示パーツ ---
+        const BestScoreDisplay = ({ score, drill, size = 'lg' }) => {
+            if (score === -9999) return null;
+            const br = getRankInfo(score, drill);
+            if (size === 'sm') {
+                return (
+                    <div className="flex items-baseline justify-center gap-1">
+                        <span className={`text-lg font-black italic ${br.color}`}>{br.rank}</span>
+                        <span className="text-lg font-black text-slate-700">{score}<span className="text-xs ml-0.5">pt</span></span>
+                    </div>
+                );
+            }
+            return (
+                <div className="flex items-baseline justify-center gap-2">
+                    <span className={`text-2xl font-black italic ${br.color}`}>{br.rank}</span>
+                    <span className="text-2xl font-black text-slate-700">{score}<span className="text-xs ml-1">pt</span></span>
+                </div>
+            );
+        };
+
+        // --- メインアプリ ---
+        function App() {
+            const [drill, setDrill]   = useState(null); // null | '6' | '7'
+            const [mode, setMode]     = useState(null); // null | 'practice' | 'timeattack'
+            const [problemStack, setProblemStack] = useState([]);
+            const [currentIdx, setCurrentIdx] = useState(0);
+            const [selectedAnswers, setSelectedAnswers] = useState([]);
+            const [isSubmitted, setIsSubmitted] = useState(false);
+            const [correctCount, setCorrectCount] = useState(0);
+            const [incorrectCount, setIncorrectCount] = useState(0);
+            const [isFinished, setIsFinished] = useState(false);
+            const [bestScore6, setBestScore6] = useState(-9999);
+            const [bestScore7, setBestScore7] = useState(-9999);
+            const [isNewRecord, setIsNewRecord] = useState(false);
+            const [startTime, setStartTime] = useState(null);
+            const [elapsedTime, setElapsedTime] = useState(0);
+            const timerRef = useRef(null);
+            const pendingStatsRef = useRef(null);
+
+            // 全スートの牌画像プリロード
+            useEffect(() => {
+                ['man', 'pin', 'sou'].forEach(suit => {
+                    for (let n = 1; n <= 9; n++) {
+                        const img = new Image();
+                        img.src = `${IMG_BASE}${suit}${n}-66-90-l.png`;
+                    }
+                });
+            }, []);
+
+            // 自己ベストをlocalStorageから読み込み
+            useEffect(() => {
+                const s6 = localStorage.getItem('mahjong6_best');
+                const s7 = localStorage.getItem('mahjong7_best');
+                if (s6 !== null) setBestScore6(parseInt(s6));
+                if (s7 !== null) setBestScore7(parseInt(s7));
+            }, []);
+
+            const bestScore = drill === '7' ? bestScore7 : bestScore6;
+            const lsKey     = drill === '7' ? 'mahjong7_best' : 'mahjong6_best';
+
+            const startNewGame = (m, d) => {
+                SoundEffect.playTap();
+                SoundEffect.init();
+                pendingStatsRef.current = null;
+
+                const source = d === '7' ? ALL_PROBLEMS_7 : ALL_PROBLEMS_6;
+                const shuffled = [...source]
+                    .sort(() => Math.random() - 0.5)
+                    .map(p => {
+                        const suit = SUITS[Math.floor(Math.random() * 3)];
+                        const reversed = Math.random() < 0.5;
+                        if (reversed) {
+                            return { ...p, suit, tiles: p.tiles.map(mirror), answers: p.answers.map(mirror) };
+                        }
+                        return { ...p, suit };
+                    });
+
+                setProblemStack(shuffled);
+                setDrill(d);
+                setMode(m);
+                setCurrentIdx(0);
+                setCorrectCount(0);
+                setIncorrectCount(0);
+                setIsFinished(false);
+                setIsNewRecord(false);
+                setSelectedAnswers([]);
+                setIsSubmitted(false);
+                setStartTime(Date.now());
+                setElapsedTime(0);
+            };
+
+            const resetToHome = () => {
+                if (timerRef.current) clearInterval(timerRef.current);
+                setDrill(null);
+                setMode(null);
+                setProblemStack([]);
+                setIsFinished(false);
+            };
+
+            useEffect(() => {
+                if (startTime && !isFinished) {
+                    timerRef.current = setInterval(() => {
+                        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+                    }, 1000);
+                } else {
+                    clearInterval(timerRef.current);
+                }
+                return () => clearInterval(timerRef.current);
+            }, [startTime, isFinished]);
+
+            const toggleAnswer = (num) => {
+                if (isSubmitted) return;
+                SoundEffect.playTap();
+                setSelectedAnswers(prev =>
+                    prev.includes(num) ? prev.filter(n => n !== num) : [...prev, num].sort((a, b) => a - b)
+                );
+            };
+
+            const handleSubmit = () => {
+                SoundEffect.playTap();
+                const currentProblem = problemStack[currentIdx];
+                const correctSet = [...new Set(currentProblem.answers)].sort((a, b) => a - b);
+                const isCorrect = JSON.stringify(selectedAnswers.sort((a, b) => a - b)) === JSON.stringify(correctSet);
+
+                if (isCorrect) {
+                    setCorrectCount(c => c + 1);
+                    SoundEffect.playCorrect();
+                } else {
+                    setIncorrectCount(i => i + 1);
+                    SoundEffect.playIncorrect();
+                }
+                setIsSubmitted(true);
+
+                const nextCorrect   = isCorrect ? correctCount + 1 : correctCount;
+                const nextIncorrect = isCorrect ? incorrectCount : incorrectCount + 1;
+                pendingStatsRef.current = { correct: nextCorrect, incorrect: nextIncorrect };
+
+                if (mode === 'timeattack') {
+                    setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), isCorrect ? 200 : 1000);
+                }
+            };
+
+            const nextQuestion = (finalCorrect, finalIncorrect, fromUserClick) => {
+                if (fromUserClick) SoundEffect.playTap();
+                if (currentIdx + 1 < problemStack.length) {
+                    setCurrentIdx(prev => prev + 1);
+                    setSelectedAnswers([]);
+                    setIsSubmitted(false);
+                } else {
+                    finishGame(finalCorrect, finalIncorrect);
+                }
+            };
+
+            const finishGame = (finalCorrect, finalIncorrect) => {
+                const pending = pendingStatsRef.current;
+                const c = pending ? pending.correct   : (finalCorrect   !== undefined ? finalCorrect   : correctCount);
+                const i = pending ? pending.incorrect : (finalIncorrect !== undefined ? finalIncorrect : incorrectCount);
+                pendingStatsRef.current = null;
+
+                const elapsed = startTime != null ? Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
+                const score = (c * 10) - (i * 10) - elapsed;
+
+                const key = drill === '7' ? 'mahjong7_best' : 'mahjong6_best';
+                const savedBest = (() => { try { const v = localStorage.getItem(key); return v != null ? parseInt(v, 10) : -9999; } catch (_) { return -9999; } })();
+                const currentBest = Math.max(drill === '7' ? bestScore7 : bestScore6, savedBest);
+
+                if (score > currentBest) {
+                    if (drill === '7') setBestScore7(score); else setBestScore6(score);
+                    localStorage.setItem(key, score.toString());
+                    setIsNewRecord(true);
+                }
+                setIsFinished(true);
+            };
+
+            // ========== ホーム画面 ==========
+            if (!drill) {
+                const DrillCard = ({ d, title, subtitle, question, color }) => {
+                    const bs = d === '7' ? bestScore7 : bestScore6;
+                    return (
+                        <div className={`rounded-2xl border-2 ${color.border} ${color.bg} p-5`}>
+                            <div className="mb-3">
+                                <div className={`font-black text-xl ${color.title}`}>{title}</div>
+                                <div className={`text-xs ${color.sub}`}>{question}</div>
+                            </div>
+                            <div className="flex gap-2 mb-3">
+                                <button onClick={() => startNewGame('practice', d)}
+                                    className={`flex-1 py-3 ${color.btn1} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                    練習モード
+                                </button>
+                                <button onClick={() => startNewGame('timeattack', d)}
+                                    className={`flex-1 py-3 ${color.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                    タイムアタック
+                                </button>
+                            </div>
+                            {bs !== -9999 && (
+                                <div className={`${color.bestBg} rounded-xl py-2 px-3 text-center`}>
+                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">自己ベスト</div>
+                                    <BestScoreDisplay score={bs} drill={d} size="sm" />
+                                </div>
+                            )}
+                        </div>
+                    );
+                };
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4">
+                        <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-8 border border-slate-100">
+                            <h1 className="text-3xl font-black text-slate-800 mb-1 text-center">【多面待ちドリル】</h1>
+                            <p className="text-slate-400 text-xs mb-6 text-center">萬子・筒子・索子 ランダム出題</p>
+
+                            <div className="space-y-4">
+                                <DrillCard d="6" title="6枚形" subtitle="26問" question="何を引いたら二面子できる？"
+                                    color={{
+                                        border: 'border-indigo-200', bg: 'bg-indigo-50',
+                                        title: 'text-indigo-900', sub: 'text-indigo-500',
+                                        btn1: 'bg-indigo-500 hover:bg-indigo-600',
+                                        btn2: 'bg-orange-400 hover:bg-orange-500',
+                                        bestBg: 'bg-white border border-indigo-100'
+                                    }}
+                                />
+                                <DrillCard d="7" title="7枚形" subtitle="19問" question="何を引いたら2面子１雀頭できる？（何待ち？）"
+                                    color={{
+                                        border: 'border-emerald-200', bg: 'bg-emerald-50',
+                                        title: 'text-emerald-900', sub: 'text-emerald-500',
+                                        btn1: 'bg-emerald-500 hover:bg-emerald-600',
+                                        btn2: 'bg-orange-400 hover:bg-orange-500',
+                                        bestBg: 'bg-white border border-emerald-100'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // ========== 結果画面 ==========
+            if (isFinished) {
+                const finalScore = (correctCount * 10) - (incorrectCount * 10) - elapsedTime;
+                const rankInfo = getRankInfo(finalScore, drill);
+                const bs = drill === '7' ? bestScore7 : bestScore6;
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4">
+                        <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-8 text-center relative overflow-hidden">
+                            {isNewRecord && (
+                                <div className="absolute top-4 right-[-35px] bg-yellow-400 text-yellow-900 text-[10px] font-black py-1 px-10 rotate-45 shadow-sm record-badge">
+                                    NEW RECORD
+                                </div>
+                            )}
+
+                            <div className="text-xs font-bold text-slate-400 mb-1">{drill === '7' ? '7枚系' : '6枚系'}</div>
+                            <h2 className="text-2xl font-bold mb-2 text-slate-800">結果発表</h2>
+                            <div className={`text-7xl font-black mb-2 italic ${rankInfo.color}`}>{rankInfo.rank}</div>
+
+                            <div className="mb-4">
+                                {isNewRecord && <div className="text-orange-500 font-black text-sm mb-1 animate-bounce">記録更新！</div>}
+                                <div className="text-4xl font-black text-slate-700">{finalScore} <span className="text-lg">pt</span></div>
+                            </div>
+
+                            <p className="text-slate-600 font-bold mb-8 px-4 leading-relaxed min-h-[3rem] flex items-center justify-center">
+                                {rankInfo.comment}
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-8 text-left">
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">Score Stats</div>
+                                    <div className="flex justify-between items-center text-sm mb-1">
+                                        <span className="text-green-600 font-bold">正解 (+{correctCount * 10})</span>
+                                        <span className="text-slate-400 font-mono">x{correctCount}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm mb-1">
+                                        <span className="text-red-500 font-bold">ミス (-{incorrectCount * 10})</span>
+                                        <span className="text-slate-400 font-mono">x{incorrectCount}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-orange-500 font-bold">時間 (-{elapsedTime})</span>
+                                        <span className="text-slate-400 font-mono">{elapsedTime}s</span>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center items-center">
+                                    <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">自己ベスト</div>
+                                    {bs !== -9999
+                                        ? <BestScoreDisplay score={bs} drill={drill} size="sm" />
+                                        : <span className="text-2xl font-black text-slate-700">—</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <button onClick={resetToHome}
+                                className="w-full py-4 bg-slate-800 text-white rounded-xl font-bold shadow-lg hover:bg-slate-700 transition-colors">
+                                タイトルへ戻る
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // ========== ゲーム画面 ==========
+            const currentProblem = problemStack[currentIdx];
+            const tileCount = currentProblem ? currentProblem.tiles.length : 6;
+
+            return (
+                <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col">
+                    <div className="bg-white px-4 py-3 flex justify-between items-center shadow-sm border-b border-slate-100 sticky top-0 z-50">
+                        <div className="font-bold text-slate-400 text-sm w-16">{currentIdx + 1} / {problemStack.length}</div>
+
+                        <button onClick={resetToHome}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            <span className="text-xs font-bold uppercase tracking-tighter">Home</span>
+                        </button>
+
+                        <div className="font-mono font-black text-orange-500 text-xl w-16 text-right">{elapsedTime}s</div>
+                    </div>
+
+                    <div className="flex-1 p-4 flex flex-col items-center">
+                        {/* 牌表示（2スロット切り替えで爆速化） */}
+                        <div className="mt-8 mb-10 relative" style={{ minHeight: '120px' }}>
+                            {[0, 1].map((slot) => {
+                                const problemIndex = slot === 0
+                                    ? (currentIdx % 2 === 0 ? currentIdx : currentIdx + 1)
+                                    : (currentIdx % 2 === 1 ? currentIdx : currentIdx + 1);
+                                const problem = problemStack[problemIndex];
+                                const isVisible = (currentIdx % 2 === 0) === (slot === 0);
+                                if (!problem) return null;
+                                return (
+                                    <div
+                                        key={slot}
+                                        className="problem-tile-group scale-110 sm:scale-125"
+                                        style={{
+                                            position: isVisible ? 'relative' : 'absolute',
+                                            left: 0, top: 0,
+                                            opacity: isVisible ? 1 : 0,
+                                            pointerEvents: isVisible ? 'auto' : 'none',
+                                            visibility: isVisible ? 'visible' : 'hidden',
+                                        }}
+                                    >
+                                        {problem.tiles.slice().sort((a, b) => a - b).map((n, i) => (
+                                            <TileImage key={`${problemIndex}-${i}`} num={n} suit={problem.suit} tileCount={problem.tiles.length} />
+                                        ))}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* 回答ボタン 1〜9 */}
+                        <div className="grid grid-cols-3 gap-0 w-full max-w-[360px] mb-8">
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                                <button
+                                    key={n}
+                                    onClick={() => toggleAnswer(n)}
+                                    disabled={isSubmitted}
+                                    className={`aspect-video rounded-xl flex items-center justify-center text-4xl font-black transition-all
+                                        ${selectedAnswers.includes(n)
+                                            ? 'bg-indigo-600 text-white scale-95 shadow-inner'
+                                            : 'bg-white text-slate-700 border-2 border-slate-200 shadow-sm'}
+                                        ${isSubmitted && currentProblem.answers.includes(n)
+                                            ? 'ring-4 ring-yellow-400 z-10'
+                                            : ''}
+                                    `}
+                                >
+                                    {n}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* 確定ボタン / 正解表示 */}
+                        <div className="w-full max-w-[360px]">
+                            {!isSubmitted ? (
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={selectedAnswers.length === 0}
+                                    className="w-full py-6 bg-indigo-600 disabled:bg-slate-200 text-white rounded-2xl font-black text-2xl shadow-lg transition-all active:scale-95"
+                                >
+                                    回答を確定
+                                </button>
+                            ) : (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="flex items-center justify-center gap-3 bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm">
+                                        <span className="text-slate-400 font-black text-xs uppercase">Correct:</span>
+                                        <div className="flex gap-1">
+                                            {currentProblem.answers.slice().sort((a, b) => a - b).map((n, i) => (
+                                                <div key={i} className="w-8 h-10 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center font-black text-slate-800 text-lg shadow-sm">
+                                                    {n}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {mode === 'practice' && (
+                                        <button
+                                            onClick={() => nextQuestion(undefined, undefined, true)}
+                                            className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xl shadow-lg hover:bg-black transition-colors"
+                                        >
+                                            次の問題へ
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
