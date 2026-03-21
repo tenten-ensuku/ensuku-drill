@@ -516,6 +516,10 @@
                                         <span className="text-orange-500 font-bold">時間 (-{elapsedTime})</span>
                                         <span className="text-slate-400 font-mono">{elapsedTime}s</span>
                                     </div>
+                                    <div className="flex justify-between items-center text-sm mt-1">
+                                        <span className="text-slate-500 font-bold">1問あたり</span>
+                                        <span className="text-slate-400 font-mono">{(elapsedTime / problemStack.length).toFixed(1)}s</span>
+                                    </div>
                                 </div>
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center items-center">
                                     <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">自己ベスト</div>
