@@ -128,7 +128,7 @@
                 };
             });
 
-        // --- 6枚系 問題データ（26問）---
+        // --- 6枚形 問題データ（26問）---
         const ALL_PROBLEMS_6 = parseData(`
             334556-347
             344568-257
@@ -158,7 +158,7 @@
             133345-236
         `);
 
-        // --- 7枚系 問題データ（19問）---
+        // --- 7枚形 問題データ（19問）---
         const ALL_PROBLEMS_7 = parseData(`
             5556777-45678
             2345678-258
@@ -181,8 +181,122 @@
             1166678-169
         `);
 
-        // --- ランク定義（drillに応じた閾値）---
-        const getRankInfo = (score, drill) => {
+        // --- 10枚形 問題データ（82問）---
+        const ALL_PROBLEMS_10 = parseData(`
+            2233445599-259
+            2233334445-246
+            2345677999-1478
+            1112346888-567
+            2223456667-25678
+            2333344599-69
+            2223344455-3456
+            1166778888-15
+            2222334444-135
+            4566667888-345789
+            1112345678-235689
+            2345678889-1479
+            2233344456-23467
+            2344555678-13469
+            6677778888-569
+            2345677888-14769
+            1112346678-569
+            1134567888-1258
+            2222344456-1437
+            1234678999-145
+            2334444556-17
+            4556677778-36958
+            3455677778-25869
+            4445678888-3695
+            2233344457-67
+            5666677888-45789
+            3334567888-23456789
+            2224567999-3478
+            1112345679-89
+            1234555678-14369
+            3456666788-2587
+            2222333444-1345
+            2223456677-5678
+            5677778888-569
+            2222344567-1347
+            2224444666-35
+            1234567888-147369
+            4566777788-36958
+            3456677888-25678
+            4455667788-4578
+            3456777788-25869
+            4456677788-569
+            2224444567-37
+            2344445567-25836
+            2222344666-1345
+            2223334445-23456
+            2345666678-147258
+            1113456888-2367
+            2224445566-34567
+            2223444567-123458
+            3456677778-258369
+            2344567888-147369
+            2233334499-9
+            3456667788-36789
+            1234567999-1478
+            2223445666-23456
+            2223456778-679
+            2223344456-23457
+            5566777888-45679
+            1166777888-169
+            2223334567-234578
+            2224566667-34578
+            2223455677-467
+            2223334456-23457
+            2345555678-28
+            4566667788-3789
+            1145666678-139
+            2223444566-456
+            3455578999-2569
+            5666677778-4589
+            2223457999-678
+            2223333444-1245
+            2222334445-1346
+            2223444556-3647
+            2345667888-1476
+            3455667888-3647
+            4566677778-36958
+            2233344445-1236
+            1113456678-2369
+            2223333456-1467
+            4566667778-3789
+            2333345678-124578
+        `);
+
+        // --- ランク定義 ---
+        const getRankInfo = (score, drill, qCount) => {
+            if (drill === '10') {
+                const isAll = qCount >= 82;
+                if (isAll) {
+                    if (score >= 350) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+                    if (score >= 280) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+                    if (score >= 220) return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                    if (score >= 170) return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんの昼間の麻雀だ' };
+                    if (score >= 130) return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
+                    if (score >= 100) return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
+                    if (score >= 70)  return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+                    if (score >= 40)  return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
+                    if (score >= 0)   return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
+                    if (score >= -80) return { rank: 'D',  color: 'text-black',    comment: '10枚形が仲間になりたそうにコチラを見ている' };
+                    return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの10枚形のようだ。' };
+                } else {
+                    if (score >= 120) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+                    if (score >= 100) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+                    if (score >= 85)  return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                    if (score >= 70)  return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんの昼間の麻雀だ' };
+                    if (score >= 55)  return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
+                    if (score >= 40)  return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
+                    if (score >= 25)  return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+                    if (score >= 10)  return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
+                    if (score >= -20) return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
+                    if (score >= -60) return { rank: 'D',  color: 'text-black',    comment: '10枚形が仲間になりたそうにコチラを見ている' };
+                    return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの10枚形のようだ。' };
+                }
+            }
             if (drill === '7') {
                 if (score >= 155) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
                 if (score >= 145) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
@@ -196,7 +310,7 @@
                 if (score >= 30)  return { rank: 'D',  color: 'text-black',    comment: '7枚形が仲間になりたそうにコチラを見ている' };
                 return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの7枚形のようだ。' };
             }
-            // 6枚系
+            // 6枚形
             if (score >= 210) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
             if (score >= 200) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
             if (score >= 190) return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
@@ -214,12 +328,16 @@
         const TileImage = ({ num, suit, tileCount }) => {
             const [error, setError] = useState(false);
             const imagePath = `${IMG_BASE}${SUIT_PREFIX[suit]}${num}-66-90-l.png`;
-            const sizeClass = tileCount >= 7 ? "h-12 sm:h-14 w-auto" : "h-14 sm:h-16 w-auto";
+            const sizeClass = tileCount >= 10
+                ? "h-9 sm:h-11 w-auto"
+                : tileCount >= 7
+                    ? "h-12 sm:h-14 w-auto"
+                    : "h-14 sm:h-16 w-auto";
 
             if (error) {
                 return (
                     <div
-                        className={`bg-white flex items-center justify-center font-bold text-sm fallback-tile ${sizeClass}`}
+                        className={`bg-white flex items-center justify-center font-bold text-xs fallback-tile ${sizeClass}`}
                         style={{ aspectRatio: '66/90' }}
                     >
                         {num}{suit}
@@ -239,9 +357,9 @@
         };
 
         // --- ベストスコア表示パーツ ---
-        const BestScoreDisplay = ({ score, drill, size = 'lg' }) => {
+        const BestScoreDisplay = ({ score, drill, qCount, size = 'lg' }) => {
             if (score === -9999) return null;
-            const br = getRankInfo(score, drill);
+            const br = getRankInfo(score, drill, qCount);
             if (size === 'sm') {
                 return (
                     <div className="flex items-baseline justify-center gap-1">
@@ -260,20 +378,23 @@
 
         // --- メインアプリ ---
         function App() {
-            const [drill, setDrill]   = useState(null); // null | '6' | '7'
-            const [mode, setMode]     = useState(null); // null | 'practice' | 'timeattack'
-            const [problemStack, setProblemStack] = useState([]);
-            const [currentIdx, setCurrentIdx] = useState(0);
+            const [drill, setDrill]     = useState(null); // null | '6' | '7' | '10'
+            const [mode, setMode]       = useState(null); // null | 'practice' | 'timeattack'
+            const [questionCount, setQuestionCount] = useState(null); // null | 20 | 82
+            const [problemStack, setProblemStack]   = useState([]);
+            const [currentIdx, setCurrentIdx]       = useState(0);
             const [selectedAnswers, setSelectedAnswers] = useState([]);
-            const [isSubmitted, setIsSubmitted] = useState(false);
-            const [correctCount, setCorrectCount] = useState(0);
+            const [isSubmitted, setIsSubmitted]     = useState(false);
+            const [correctCount, setCorrectCount]   = useState(0);
             const [incorrectCount, setIncorrectCount] = useState(0);
-            const [isFinished, setIsFinished] = useState(false);
-            const [bestScore6, setBestScore6] = useState(-9999);
-            const [bestScore7, setBestScore7] = useState(-9999);
-            const [isNewRecord, setIsNewRecord] = useState(false);
-            const [startTime, setStartTime] = useState(null);
-            const [elapsedTime, setElapsedTime] = useState(0);
+            const [isFinished, setIsFinished]       = useState(false);
+            const [bestScore6, setBestScore6]       = useState(-9999);
+            const [bestScore7, setBestScore7]       = useState(-9999);
+            const [bestScore10_20, setBestScore10_20] = useState(-9999);
+            const [bestScore10_all, setBestScore10_all] = useState(-9999);
+            const [isNewRecord, setIsNewRecord]     = useState(false);
+            const [startTime, setStartTime]         = useState(null);
+            const [elapsedTime, setElapsedTime]     = useState(0);
             const timerRef = useRef(null);
             const pendingStatsRef = useRef(null);
 
@@ -289,35 +410,52 @@
 
             // 自己ベストをlocalStorageから読み込み
             useEffect(() => {
-                const s6 = localStorage.getItem('mahjong6_best');
-                const s7 = localStorage.getItem('mahjong7_best');
-                if (s6 !== null) setBestScore6(parseInt(s6));
-                if (s7 !== null) setBestScore7(parseInt(s7));
+                const s6  = localStorage.getItem('mahjong6_best');
+                const s7  = localStorage.getItem('mahjong7_best');
+                const s10_20  = localStorage.getItem('mahjong10_best_20');
+                const s10_all = localStorage.getItem('mahjong10_best_82');
+                if (s6  !== null) setBestScore6(parseInt(s6));
+                if (s7  !== null) setBestScore7(parseInt(s7));
+                if (s10_20  !== null) setBestScore10_20(parseInt(s10_20));
+                if (s10_all !== null) setBestScore10_all(parseInt(s10_all));
             }, []);
 
-            const bestScore = drill === '7' ? bestScore7 : bestScore6;
-            const lsKey     = drill === '7' ? 'mahjong7_best' : 'mahjong6_best';
+            const getBestScore = (d, qc) => {
+                if (d === '7')  return bestScore7;
+                if (d === '10') return qc === 20 ? bestScore10_20 : bestScore10_all;
+                return bestScore6;
+            };
+            const getLsKey = (d, qc) => {
+                if (d === '7')  return 'mahjong7_best';
+                if (d === '10') return qc === 20 ? 'mahjong10_best_20' : 'mahjong10_best_82';
+                return 'mahjong6_best';
+            };
 
-            const startNewGame = (m, d) => {
+            const startNewGame = (m, d, qc) => {
                 SoundEffect.playTap();
                 SoundEffect.init();
                 pendingStatsRef.current = null;
 
-                const source = d === '7' ? ALL_PROBLEMS_7 : ALL_PROBLEMS_6;
-                const shuffled = [...source]
-                    .sort(() => Math.random() - 0.5)
-                    .map(p => {
-                        const suit = SUITS[Math.floor(Math.random() * 3)];
-                        const reversed = Math.random() < 0.5;
-                        if (reversed) {
-                            return { ...p, suit, tiles: p.tiles.map(mirror), answers: p.answers.map(mirror) };
-                        }
-                        return { ...p, suit };
-                    });
+                const source =
+                    d === '7'  ? ALL_PROBLEMS_7  :
+                    d === '10' ? ALL_PROBLEMS_10  :
+                                 ALL_PROBLEMS_6;
 
-                setProblemStack(shuffled);
+                const shuffled = [...source].sort(() => Math.random() - 0.5);
+                const selected = (d === '10' && qc === 20) ? shuffled.slice(0, 20) : shuffled;
+
+                const stack = selected.map(p => {
+                    const suit     = SUITS[Math.floor(Math.random() * 3)];
+                    const reversed = Math.random() < 0.5;
+                    return reversed
+                        ? { ...p, suit, tiles: p.tiles.map(mirror), answers: p.answers.map(mirror) }
+                        : { ...p, suit };
+                });
+
+                setProblemStack(stack);
                 setDrill(d);
                 setMode(m);
+                setQuestionCount(qc || null);
                 setCurrentIdx(0);
                 setCorrectCount(0);
                 setIncorrectCount(0);
@@ -333,6 +471,7 @@
                 if (timerRef.current) clearInterval(timerRef.current);
                 setDrill(null);
                 setMode(null);
+                setQuestionCount(null);
                 setProblemStack([]);
                 setIsFinished(false);
             };
@@ -398,14 +537,17 @@
                 pendingStatsRef.current = null;
 
                 const elapsed = startTime != null ? Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
-                const score = (c * 10) - (i * 10) - elapsed;
+                const score   = (c * 10) - (i * 10) - elapsed;
 
-                const key = drill === '7' ? 'mahjong7_best' : 'mahjong6_best';
-                const savedBest = (() => { try { const v = localStorage.getItem(key); return v != null ? parseInt(v, 10) : -9999; } catch (_) { return -9999; } })();
-                const currentBest = Math.max(drill === '7' ? bestScore7 : bestScore6, savedBest);
+                const key         = getLsKey(drill, questionCount);
+                const savedBest   = (() => { try { const v = localStorage.getItem(key); return v != null ? parseInt(v, 10) : -9999; } catch (_) { return -9999; } })();
+                const currentBest = Math.max(getBestScore(drill, questionCount), savedBest);
 
                 if (score > currentBest) {
-                    if (drill === '7') setBestScore7(score); else setBestScore6(score);
+                    if (drill === '7')              setBestScore7(score);
+                    else if (drill === '10' && questionCount === 20)  setBestScore10_20(score);
+                    else if (drill === '10')         setBestScore10_all(score);
+                    else                             setBestScore6(score);
                     localStorage.setItem(key, score.toString());
                     setIsNewRecord(true);
                 }
@@ -414,33 +556,45 @@
 
             // ========== ホーム画面 ==========
             if (!drill) {
-                const DrillCard = ({ d, title, subtitle, question, color }) => {
-                    const bs = d === '7' ? bestScore7 : bestScore6;
+                const DrillCard = ({ d, title, question, color, buttons }) => {
                     return (
                         <div className={`rounded-2xl border-2 ${color.border} ${color.bg} p-5`}>
                             <div className="mb-3">
                                 <div className={`font-black text-xl ${color.title}`}>{title}</div>
                                 <div className={`text-xs ${color.sub}`}>{question}</div>
                             </div>
-                            <div className="flex gap-2 mb-3">
-                                <button onClick={() => startNewGame('practice', d)}
-                                    className={`flex-1 py-3 ${color.btn1} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
-                                    練習モード
-                                </button>
-                                <button onClick={() => startNewGame('timeattack', d)}
-                                    className={`flex-1 py-3 ${color.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
-                                    タイムアタック
-                                </button>
-                            </div>
-                            {bs !== -9999 && (
-                                <div className={`${color.bestBg} rounded-xl py-2 px-3 text-center`}>
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">自己ベスト</div>
-                                    <BestScoreDisplay score={bs} drill={d} size="sm" />
-                                </div>
-                            )}
+                            {buttons}
                         </div>
                     );
                 };
+
+                const TwoButtonRow = ({ d, qc, color }) => (
+                    <div className="flex gap-2 mb-3">
+                        <button onClick={() => startNewGame('practice', d, qc)}
+                            className={`flex-1 py-3 ${color.btn1} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                            練習
+                        </button>
+                        <button onClick={() => startNewGame('timeattack', d, qc)}
+                            className={`flex-1 py-3 ${color.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                            タイムアタック
+                        </button>
+                    </div>
+                );
+
+                const BestBadge = ({ score, drill, qCount, label, color }) => {
+                    if (score === -9999) return null;
+                    return (
+                        <div className={`${color.bestBg} rounded-xl py-2 px-3 text-center`}>
+                            {label && <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{label}</div>}
+                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">自己ベスト</div>
+                            <BestScoreDisplay score={score} drill={drill} qCount={qCount} size="sm" />
+                        </div>
+                    );
+                };
+
+                const color6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  sub: 'text-indigo-500',  btn1: 'bg-indigo-500 hover:bg-indigo-600',  btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-indigo-100' };
+                const color7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', sub: 'text-emerald-500', btn1: 'bg-emerald-500 hover:bg-emerald-600', btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-emerald-100' };
+                const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-violet-100' };
 
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4">
@@ -449,23 +603,33 @@
                             <p className="text-slate-400 text-xs mb-6 text-center">萬子・筒子・索子 ランダム出題</p>
 
                             <div className="space-y-4">
-                                <DrillCard d="6" title="6枚形" subtitle="26問" question="何を引いたら二面子できる？"
-                                    color={{
-                                        border: 'border-indigo-200', bg: 'bg-indigo-50',
-                                        title: 'text-indigo-900', sub: 'text-indigo-500',
-                                        btn1: 'bg-indigo-500 hover:bg-indigo-600',
-                                        btn2: 'bg-orange-400 hover:bg-orange-500',
-                                        bestBg: 'bg-white border border-indigo-100'
-                                    }}
+                                <DrillCard d="6" title="6枚形" question="何を引いたら二面子できる？" color={color6}
+                                    buttons={<>
+                                        <TwoButtonRow d="6" color={color6} />
+                                        <BestBadge score={bestScore6} drill="6" color={color6} />
+                                    </>}
                                 />
-                                <DrillCard d="7" title="7枚形" subtitle="19問" question="何を引いたら2面子１雀頭できる？（何待ち？）"
-                                    color={{
-                                        border: 'border-emerald-200', bg: 'bg-emerald-50',
-                                        title: 'text-emerald-900', sub: 'text-emerald-500',
-                                        btn1: 'bg-emerald-500 hover:bg-emerald-600',
-                                        btn2: 'bg-orange-400 hover:bg-orange-500',
-                                        bestBg: 'bg-white border border-emerald-100'
-                                    }}
+                                <DrillCard d="7" title="7枚形" question="何を引いたら2面子１雀頭できる？（何待ち？）" color={color7}
+                                    buttons={<>
+                                        <TwoButtonRow d="7" color={color7} />
+                                        <BestBadge score={bestScore7} drill="7" color={color7} />
+                                    </>}
+                                />
+                                <DrillCard d="10" title="10枚形" question="何を引いたら3面子１雀頭できる？（何待ち？）" color={color10}
+                                    buttons={<>
+                                        <div className="mb-1">
+                                            <div className="text-[10px] text-violet-400 font-bold mb-1">20問ランダム</div>
+                                            <TwoButtonRow d="10" qc={20} color={color10} />
+                                        </div>
+                                        <div className="mb-3">
+                                            <div className="text-[10px] text-violet-400 font-bold mb-1">全82問</div>
+                                            <TwoButtonRow d="10" qc={82} color={color10} />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <BestBadge score={bestScore10_20}  drill="10" qCount={20} label="20問" color={color10} />
+                                            <BestBadge score={bestScore10_all} drill="10" qCount={82} label="全82問" color={color10} />
+                                        </div>
+                                    </>}
                                 />
                             </div>
                         </div>
@@ -476,8 +640,9 @@
             // ========== 結果画面 ==========
             if (isFinished) {
                 const finalScore = (correctCount * 10) - (incorrectCount * 10) - elapsedTime;
-                const rankInfo = getRankInfo(finalScore, drill);
-                const bs = drill === '7' ? bestScore7 : bestScore6;
+                const rankInfo   = getRankInfo(finalScore, drill, questionCount);
+                const bs         = getBestScore(drill, questionCount);
+                const drillLabel = drill === '7' ? '7枚形' : drill === '10' ? `10枚形（${questionCount}問）` : '6枚形';
 
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4">
@@ -488,7 +653,7 @@
                                 </div>
                             )}
 
-                            <div className="text-xs font-bold text-slate-400 mb-1">{drill === '7' ? '7枚系' : '6枚系'}</div>
+                            <div className="text-xs font-bold text-slate-400 mb-1">{drillLabel}</div>
                             <h2 className="text-2xl font-bold mb-2 text-slate-800">結果発表</h2>
                             <div className={`text-7xl font-black mb-2 italic ${rankInfo.color}`}>{rankInfo.rank}</div>
 
@@ -524,7 +689,7 @@
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center items-center">
                                     <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">自己ベスト</div>
                                     {bs !== -9999
-                                        ? <BestScoreDisplay score={bs} drill={drill} size="sm" />
+                                        ? <BestScoreDisplay score={bs} drill={drill} qCount={questionCount} size="sm" />
                                         : <span className="text-2xl font-black text-slate-700">—</span>
                                     }
                                 </div>
@@ -541,7 +706,8 @@
 
             // ========== ゲーム画面 ==========
             const currentProblem = problemStack[currentIdx];
-            const tileCount = currentProblem ? currentProblem.tiles.length : 6;
+            const tileCount      = currentProblem ? currentProblem.tiles.length : 6;
+            const scaleClass     = tileCount >= 10 ? '' : 'scale-110 sm:scale-125';
 
             return (
                 <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col">
@@ -566,13 +732,13 @@
                                 const problemIndex = slot === 0
                                     ? (currentIdx % 2 === 0 ? currentIdx : currentIdx + 1)
                                     : (currentIdx % 2 === 1 ? currentIdx : currentIdx + 1);
-                                const problem = problemStack[problemIndex];
-                                const isVisible = (currentIdx % 2 === 0) === (slot === 0);
+                                const problem    = problemStack[problemIndex];
+                                const isVisible  = (currentIdx % 2 === 0) === (slot === 0);
                                 if (!problem) return null;
                                 return (
                                     <div
                                         key={slot}
-                                        className="problem-tile-group scale-110 sm:scale-125"
+                                        className={`problem-tile-group ${scaleClass}`}
                                         style={{
                                             position: isVisible ? 'relative' : 'absolute',
                                             left: 0, top: 0,
