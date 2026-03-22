@@ -678,7 +678,8 @@
                                         <div className="overflow-x-auto mb-2">
                                         <div className="problem-tile-group">
                                             {fav.tiles.slice().sort((a, b) => a - b).map((n, j) => {
-                                                const ph = Math.min(40, Math.floor(290 / fav.tiles.length));
+                                                const tw = Math.floor((272 - (fav.tiles.length - 1) * 1) / fav.tiles.length);
+                                                const ph = Math.min(40, Math.round(tw * 90 / 66));
                                                 return <TileImage key={j} num={n} suit={fav.suit} style={{height: `${ph}px`, width: 'auto', display: 'block'}} />;
                                             })}
                                         </div>
@@ -907,7 +908,8 @@
                                                     <div className="overflow-x-auto mb-2">
                                                     <div className="problem-tile-group">
                                                         {entry.problem.tiles.slice().sort((a, b) => a - b).map((n, j) => {
-                                                            const ph = Math.min(40, Math.floor(290 / entry.problem.tiles.length));
+                                                            const tw = Math.floor((272 - (entry.problem.tiles.length - 1) * 1) / entry.problem.tiles.length);
+                                                            const ph = Math.min(40, Math.round(tw * 90 / 66));
                                                             return <TileImage key={j} num={n} suit={entry.problem.suit} style={{height: `${ph}px`, width: 'auto', display: 'block'}} />;
                                                         })}
                                                     </div>
