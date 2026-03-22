@@ -397,8 +397,9 @@
             const [elapsedTime, setElapsedTime]     = useState(0);
             const timerRef = useRef(null);
             const pendingStatsRef = useRef(null);
-            const [wrongLog, setWrongLog] = useState([]);   // [{problem, userAnswers}]
-            const [favorites, setFavorites] = useState([]); // localStorage 'mahjong_favorites'
+            const [wrongLog, setWrongLog] = useState([]);       // [{problem, userAnswers}]
+            const [favorites, setFavorites] = useState([]);   // localStorage 'mahjong_favorites'
+            const [reviewBucket, setReviewBucket] = useState([]); // localStorage 'mahjong_review_bucket'
 
             // 全スートの牌画像プリロード
             useEffect(() => {
@@ -415,6 +416,10 @@
                 try {
                     const saved = localStorage.getItem('mahjong_favorites');
                     if (saved) setFavorites(JSON.parse(saved));
+                } catch (_) {}
+                try {
+                    const saved = localStorage.getItem('mahjong_review_bucket');
+                    if (saved) setReviewBucket(JSON.parse(saved));
                 } catch (_) {}
             }, []);
 
@@ -514,10 +519,29 @@
                 if (isCorrect) {
                     setCorrectCount(c => c + 1);
                     SoundEffect.playCorrect();
+                    // 復習モードで正解 → バケットから削除
+                    if (mode === 'review' && currentProblem.bucketId) {
+                        setReviewBucket(prev => {
+                            const updated = prev.filter(b => b.id !== currentProblem.bucketId);
+                            localStorage.setItem('mahjong_review_bucket', JSON.stringify(updated));
+                            return updated;
+                        });
+                    }
                 } else {
                     setIncorrectCount(i => i + 1);
                     SoundEffect.playIncorrect();
                     setWrongLog(prev => [...prev, { problem: currentProblem, userAnswers: [...selectedAnswers] }]);
+                    // 間違えた問題を復習バケットへ自動追加（重複なし）
+                    if (mode !== 'review') {
+                        const key = JSON.stringify(currentProblem.tiles) + currentProblem.suit;
+                        setReviewBucket(prev => {
+                            if (prev.some(b => JSON.stringify(b.tiles) + b.suit === key)) return prev;
+                            const item = { id: Date.now(), tiles: currentProblem.tiles, answers: currentProblem.answers, suit: currentProblem.suit };
+                            const updated = [...prev, item];
+                            localStorage.setItem('mahjong_review_bucket', JSON.stringify(updated));
+                            return updated;
+                        });
+                    }
                 }
                 setIsSubmitted(true);
 
@@ -546,6 +570,7 @@
                 const c = pending ? pending.correct   : (finalCorrect   !== undefined ? finalCorrect   : correctCount);
                 const i = pending ? pending.incorrect : (finalIncorrect !== undefined ? finalIncorrect : incorrectCount);
                 pendingStatsRef.current = null;
+                if (mode === 'review') { setIsFinished(true); return; }
 
                 const elapsed = startTime != null ? Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
                 const score   = (c * 10) - (i * 10) - elapsed;
@@ -563,6 +588,29 @@
                     setIsNewRecord(true);
                 }
                 setIsFinished(true);
+            };
+
+            const startReviewGame = () => {
+                SoundEffect.playTap();
+                SoundEffect.init();
+                pendingStatsRef.current = null;
+                const stack = reviewBucket.map(b => ({
+                    tiles: b.tiles, answers: b.answers, suit: b.suit, bucketId: b.id
+                })).sort(() => Math.random() - 0.5);
+                setProblemStack(stack);
+                setWrongLog([]);
+                setDrill('review');
+                setMode('review');
+                setQuestionCount(null);
+                setCurrentIdx(0);
+                setCorrectCount(0);
+                setIncorrectCount(0);
+                setIsFinished(false);
+                setIsNewRecord(false);
+                setSelectedAnswers([]);
+                setIsSubmitted(false);
+                setStartTime(Date.now());
+                setElapsedTime(0);
             };
 
             const addFavorite = (entry) => {
@@ -652,6 +700,43 @@
                                     </>}
                                 />
                             </div>
+
+                            {reviewBucket.length > 0 && (
+                                <button onClick={startReviewGame}
+                                    className="w-full mt-4 py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-black text-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                                    🔄 復習バケット
+                                    <span className="bg-white text-rose-500 text-sm font-black px-2 py-0.5 rounded-full">{reviewBucket.length}問</span>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
+
+            // ========== 復習モード結果画面 ==========
+            if (isFinished && mode === 'review') {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4">
+                        <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-8 text-center">
+                            <div className="text-5xl mb-4">🔄</div>
+                            <h2 className="text-2xl font-black text-slate-800 mb-2">復習完了！</h2>
+                            <div className="grid grid-cols-2 gap-3 mb-6 text-sm">
+                                <div className="bg-green-50 border border-green-200 rounded-2xl p-3">
+                                    <div className="text-green-600 font-black text-2xl">{correctCount}</div>
+                                    <div className="text-green-500 font-bold text-xs">正解（バケットから削除）</div>
+                                </div>
+                                <div className="bg-red-50 border border-red-200 rounded-2xl p-3">
+                                    <div className="text-red-500 font-black text-2xl">{incorrectCount}</div>
+                                    <div className="text-red-400 font-bold text-xs">不正解（バケットに残留）</div>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 rounded-xl p-3 mb-6 text-sm text-slate-500 font-bold">
+                                現在の復習バケット：{reviewBucket.length}問
+                            </div>
+                            <button onClick={resetToHome}
+                                className="w-full py-4 bg-slate-800 text-white rounded-xl font-bold shadow-lg hover:bg-slate-700 transition-colors">
+                                タイトルへ戻る
+                            </button>
                         </div>
                     </div>
                 );
@@ -875,7 +960,7 @@
                                         </div>
                                     </div>
 
-                                    {mode === 'practice' && (
+                                    {(mode === 'practice' || mode === 'review') && (
                                         <button
                                             onClick={() => nextQuestion(undefined, undefined, true)}
                                             className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xl shadow-lg hover:bg-black transition-colors"
