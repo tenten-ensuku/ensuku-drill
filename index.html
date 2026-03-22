@@ -12,6 +12,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
 
+        @keyframes resultPop {
+            0%   { transform: scale(0.6); opacity: 0; }
+            60%  { transform: scale(1.1); }
+            100% { transform: scale(1);   opacity: 0.85; }
+        }
+
         .problem-tile-group {
             display: inline-flex;
             background: white;
@@ -404,6 +410,7 @@
             const [favorites, setFavorites] = useState([]);
             const [reviewBucket, setReviewBucket] = useState([]);
             const [showFavorites, setShowFavorites] = useState(false);
+            const [lastResult, setLastResult] = useState(null); // null | 'correct' | 'incorrect'
 
             // 全スートの牌画像プリロード
             useEffect(() => {
@@ -553,13 +560,17 @@
                 const nextIncorrect = isCorrect ? incorrectCount : incorrectCount + 1;
                 pendingStatsRef.current = { correct: nextCorrect, incorrect: nextIncorrect };
 
-                if (mode === 'timeattack' || (mode === 'review' && isCorrect)) {
+                if (mode === 'timeattack') {
+                    setLastResult(isCorrect ? 'correct' : 'incorrect');
+                    setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), isCorrect ? 600 : 1200);
+                } else if (mode === 'review' && isCorrect) {
                     setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), 200);
                 }
             };
 
             const nextQuestion = (finalCorrect, finalIncorrect, fromUserClick) => {
                 if (fromUserClick) SoundEffect.playTap();
+                setLastResult(null);
                 if (currentIdx + 1 < problemStack.length) {
                     setCurrentIdx(prev => prev + 1);
                     setSelectedAnswers([]);
@@ -960,7 +971,23 @@
             const scaleClass     = tileCount >= 10 ? '' : 'scale-110 sm:scale-125';
 
             return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col">
+                <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col relative">
+                    {/* ○✕ オーバーレイ（タイムアタック用） */}
+                    {lastResult && (
+                        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[100]">
+                            <div style={{
+                                fontSize: '160px',
+                                fontWeight: 900,
+                                lineHeight: 1,
+                                color: lastResult === 'correct' ? '#22c55e' : '#ef4444',
+                                opacity: 0.85,
+                                textShadow: '0 4px 24px rgba(0,0,0,0.18)',
+                                animation: 'resultPop 0.15s ease-out',
+                            }}>
+                                {lastResult === 'correct' ? '○' : '✕'}
+                            </div>
+                        </div>
+                    )}
                     <div className="bg-white px-4 py-3 flex justify-between items-center shadow-sm border-b border-slate-100 sticky top-0 z-50">
                         <div className="font-bold text-slate-400 text-sm w-16">{currentIdx + 1} / {problemStack.length}</div>
 
