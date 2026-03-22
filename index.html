@@ -646,9 +646,11 @@
             };
 
             const removeFavorite = (id) => {
-                const updated = favorites.filter(f => f.id !== id);
-                setFavorites(updated);
-                localStorage.setItem('mahjong_favorites', JSON.stringify(updated));
+                setFavorites(prev => {
+                    const updated = prev.filter(f => f.id !== id);
+                    localStorage.setItem('mahjong_favorites', JSON.stringify(updated));
+                    return updated;
+                });
             };
 
             // ========== お気に入り一覧画面 ==========
