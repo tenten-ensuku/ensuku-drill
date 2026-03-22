@@ -325,7 +325,7 @@
         };
 
         // --- 牌画像コンポーネント ---
-        const TileImage = ({ num, suit, tileCount }) => {
+        const TileImage = ({ num, suit, tileCount, style: inlineStyle }) => {
             const [error, setError] = useState(false);
             const imagePath = `${IMG_BASE}${SUIT_PREFIX[suit]}${num}-66-90-l.png`;
             const sizeClass = tileCount >= 10
@@ -338,7 +338,7 @@
                 return (
                     <div
                         className={`bg-white flex items-center justify-center font-bold text-xs fallback-tile ${sizeClass}`}
-                        style={{ aspectRatio: '66/90' }}
+                        style={{ aspectRatio: '66/90', ...inlineStyle }}
                     >
                         {num}{suit}
                     </div>
@@ -349,6 +349,7 @@
                     src={imagePath}
                     alt={`${num}${suit}`}
                     className={`${sizeClass} block`}
+                    style={inlineStyle}
                     loading="eager"
                     decoding="sync"
                     onError={() => setError(true)}
@@ -676,9 +677,10 @@
                                     <div key={fav.id} className="bg-white border border-slate-200 rounded-2xl p-3">
                                         <div className="overflow-x-auto mb-2">
                                         <div className="problem-tile-group">
-                                            {fav.tiles.slice().sort((a, b) => a - b).map((n, j) => (
-                                                <TileImage key={j} num={n} suit={fav.suit} className={`${fav.tiles.length >= 10 ? 'h-7' : 'h-10'} w-auto`} />
-                                            ))}
+                                            {fav.tiles.slice().sort((a, b) => a - b).map((n, j) => {
+                                                const ph = Math.min(40, Math.floor(290 / fav.tiles.length));
+                                                return <TileImage key={j} num={n} suit={fav.suit} style={{height: `${ph}px`, width: 'auto', display: 'block'}} />;
+                                            })}
                                         </div>
                                         </div>
                                         <div className="flex items-center justify-between">
@@ -904,9 +906,10 @@
                                                 <div key={i} className="bg-slate-50 border border-slate-200 rounded-2xl p-3">
                                                     <div className="overflow-x-auto mb-2">
                                                     <div className="problem-tile-group">
-                                                        {entry.problem.tiles.slice().sort((a, b) => a - b).map((n, j) => (
-                                                            <TileImage key={j} num={n} suit={entry.problem.suit} className={`${entry.problem.tiles.length >= 10 ? 'h-7' : 'h-10'} w-auto`} />
-                                                        ))}
+                                                        {entry.problem.tiles.slice().sort((a, b) => a - b).map((n, j) => {
+                                                            const ph = Math.min(40, Math.floor(290 / entry.problem.tiles.length));
+                                                            return <TileImage key={j} num={n} suit={entry.problem.suit} style={{height: `${ph}px`, width: 'auto', display: 'block'}} />;
+                                                        })}
                                                     </div>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-xs mb-1">
