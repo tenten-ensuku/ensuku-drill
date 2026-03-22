@@ -677,11 +677,9 @@
                                     <div key={fav.id} className="bg-white border border-slate-200 rounded-2xl p-3">
                                         <div className="overflow-x-auto mb-2">
                                         <div className="problem-tile-group">
-                                            {fav.tiles.slice().sort((a, b) => a - b).map((n, j) => {
-                                                const tw = Math.floor((272 - (fav.tiles.length - 1) * 1) / fav.tiles.length);
-                                                const ph = Math.min(40, Math.round(tw * 90 / 66));
-                                                return <TileImage key={j} num={n} suit={fav.suit} style={{height: `${ph}px`, width: 'auto', display: 'block'}} />;
-                                            })}
+                                            {fav.tiles.slice().sort((a, b) => a - b).map((n, j) => (
+                                                <TileImage key={j} num={n} suit={fav.suit} tileCount={fav.tiles.length} />
+                                            ))}
                                         </div>
                                         </div>
                                         <div className="flex items-center justify-between">
@@ -907,11 +905,9 @@
                                                 <div key={i} className="bg-slate-50 border border-slate-200 rounded-2xl p-3">
                                                     <div className="overflow-x-auto mb-2">
                                                     <div className="problem-tile-group">
-                                                        {entry.problem.tiles.slice().sort((a, b) => a - b).map((n, j) => {
-                                                            const tw = Math.floor((272 - (entry.problem.tiles.length - 1) * 1) / entry.problem.tiles.length);
-                                                            const ph = Math.min(40, Math.round(tw * 90 / 66));
-                                                            return <TileImage key={j} num={n} suit={entry.problem.suit} style={{height: `${ph}px`, width: 'auto', display: 'block'}} />;
-                                                        })}
+                                                        {entry.problem.tiles.slice().sort((a, b) => a - b).map((n, j) => (
+                                                            <TileImage key={j} num={n} suit={entry.problem.suit} tileCount={entry.problem.tiles.length} />
+                                                        ))}
                                                     </div>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-xs mb-1">
