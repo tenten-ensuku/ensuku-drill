@@ -677,7 +677,7 @@
                                         <div className="overflow-x-auto mb-2">
                                         <div className="problem-tile-group">
                                             {fav.tiles.slice().sort((a, b) => a - b).map((n, j) => (
-                                                <TileImage key={j} num={n} suit={fav.suit} className={`${fav.tiles.length >= 10 ? 'h-8' : 'h-10'} w-auto`} />
+                                                <TileImage key={j} num={n} suit={fav.suit} className={`${fav.tiles.length >= 10 ? 'h-7' : 'h-10'} w-auto`} />
                                             ))}
                                         </div>
                                         </div>
@@ -905,7 +905,7 @@
                                                     <div className="overflow-x-auto mb-2">
                                                     <div className="problem-tile-group">
                                                         {entry.problem.tiles.slice().sort((a, b) => a - b).map((n, j) => (
-                                                            <TileImage key={j} num={n} suit={entry.problem.suit} className={`${entry.problem.tiles.length >= 10 ? 'h-8' : 'h-10'} w-auto`} />
+                                                            <TileImage key={j} num={n} suit={entry.problem.suit} className={`${entry.problem.tiles.length >= 10 ? 'h-7' : 'h-10'} w-auto`} />
                                                         ))}
                                                     </div>
                                                     </div>
