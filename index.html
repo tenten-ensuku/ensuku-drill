@@ -562,8 +562,8 @@
 
                 if (mode === 'timeattack') {
                     setLastResult(isCorrect ? 'correct' : 'incorrect');
-                    setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), 200);
-                    setTimeout(() => setLastResult(null), 700);
+                    setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), 0);
+                    setTimeout(() => setLastResult(null), 500);
                 } else if (mode === 'review' && isCorrect) {
                     setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), 200);
                 }
