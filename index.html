@@ -553,7 +553,7 @@
                 const nextIncorrect = isCorrect ? incorrectCount : incorrectCount + 1;
                 pendingStatsRef.current = { correct: nextCorrect, incorrect: nextIncorrect };
 
-                if (mode === 'timeattack') {
+                if (mode === 'timeattack' || mode === 'review') {
                     setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), isCorrect ? 200 : 1000);
                 }
             };
