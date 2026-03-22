@@ -562,7 +562,8 @@
 
                 if (mode === 'timeattack') {
                     setLastResult(isCorrect ? 'correct' : 'incorrect');
-                    setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), isCorrect ? 600 : 1200);
+                    setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), 200);
+                    setTimeout(() => setLastResult(null), 700);
                 } else if (mode === 'review' && isCorrect) {
                     setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), 200);
                 }
@@ -570,7 +571,6 @@
 
             const nextQuestion = (finalCorrect, finalIncorrect, fromUserClick) => {
                 if (fromUserClick) SoundEffect.playTap();
-                setLastResult(null);
                 if (currentIdx + 1 < problemStack.length) {
                     setCurrentIdx(prev => prev + 1);
                     setSelectedAnswers([]);
