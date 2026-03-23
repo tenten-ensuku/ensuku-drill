@@ -413,6 +413,7 @@
             const [lastResult, setLastResult] = useState(null); // null | 'correct' | 'incorrect'
             const [uraMode, setUraMode] = useState(false);
             const [uraGameOver, setUraGameOver] = useState(false);
+            const [uraLockMsg, setUraLockMsg] = useState(null);
 
             // 全スートの牌画像プリロード
             useEffect(() => {
@@ -459,14 +460,11 @@
             };
 
             const URA_RANK_ORDER = ['E','D','C','B-','B','B+','A-','A','A+','S','SS'];
-            const isUraUnlocked = (() => {
-                const ok = (score, d, qc) => {
-                    if (score === -9999) return false;
-                    const { rank } = getRankInfo(score, d, qc);
-                    return URA_RANK_ORDER.indexOf(rank) >= URA_RANK_ORDER.indexOf('A');
-                };
-                return ok(bestScore6, '6') && ok(bestScore7, '7') && ok(bestScore10_20, '10', 20) && ok(bestScore10_all, '10', 82);
-            })();
+            const isRankSOrAbove = (score, d, qc) => {
+                if (score === -9999) return false;
+                const { rank } = getRankInfo(score, d, qc);
+                return URA_RANK_ORDER.indexOf(rank) >= URA_RANK_ORDER.indexOf('S');
+            };
 
             const startNewGame = (m, d, qc) => {
                 SoundEffect.playTap();
@@ -642,7 +640,7 @@
                 const c = pending ? pending.correct   : (finalCorrect   !== undefined ? finalCorrect   : correctCount);
                 const i = pending ? pending.incorrect : (finalIncorrect !== undefined ? finalIncorrect : incorrectCount);
                 pendingStatsRef.current = null;
-                if (mode === 'review' || mode === 'ura') { setIsFinished(true); return; }
+                if (mode === 'review') { setIsFinished(true); return; }
 
                 const elapsed = startTime != null ? Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
                 const score   = (c * 10) - (i * 10) - elapsed;
@@ -776,44 +774,65 @@
 
             // ========== 裏モードホーム画面 ==========
             if (!drill && uraMode) {
-                const dkColor6  = { border: 'border-gray-600', bg: 'bg-gray-800', title: 'text-gray-100', sub: 'text-gray-400', btn2: 'bg-gray-600 hover:bg-gray-500', bestBg: 'bg-gray-700 border border-gray-600' };
-                const dkColor7  = { border: 'border-gray-600', bg: 'bg-gray-800', title: 'text-gray-100', sub: 'text-gray-400', btn2: 'bg-gray-600 hover:bg-gray-500', bestBg: 'bg-gray-700 border border-gray-600' };
-                const dkColor10 = { border: 'border-gray-600', bg: 'bg-gray-800', title: 'text-gray-100', sub: 'text-gray-400', btn2: 'bg-gray-600 hover:bg-gray-500', bestBg: 'bg-gray-700 border border-gray-600' };
+                const unlocked6      = isRankSOrAbove(bestScore6, '6');
+                const unlocked7      = isRankSOrAbove(bestScore7, '7');
+                const unlocked10_20  = isRankSOrAbove(bestScore10_20, '10', 20);
+                const unlocked10_all = isRankSOrAbove(bestScore10_all, '10', 82);
+
                 const DkDrillCard = ({ title, buttons }) => (
                     <div className="rounded-2xl border-2 border-gray-600 bg-gray-800 p-3">
                         <div className="mb-2 font-black text-base text-gray-100">{title}</div>
                         {buttons}
                     </div>
                 );
-                const DkBtn = ({ label, onClick }) => (
-                    <button onClick={onClick}
-                        className="flex-1 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-xl font-bold text-sm transition-all active:scale-95">
+                const DkBtn = ({ label, onClick, locked }) => (
+                    <button
+                        onClick={locked ? () => {
+                            setUraLockMsg('解放条件Sを満たしていません');
+                            setTimeout(() => setUraLockMsg(null), 2000);
+                        } : onClick}
+                        className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 relative overflow-hidden ${
+                            locked ? 'bg-gray-800 text-gray-600' : 'bg-gray-600 hover:bg-gray-500 text-white'
+                        }`}
+                    >
+                        {locked && (
+                            <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-[1px] flex items-center justify-center text-lg">
+                                🔒
+                            </div>
+                        )}
                         {label}
                     </button>
                 );
                 return (
                     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-5 border border-gray-700">
-                            <h1 className="text-2xl font-black text-white mb-1 text-center">🌑 裏モード</h1>
-                            <p className="text-gray-400 text-xs mb-3 text-center">間違えた瞬間ゲームオーバー・全正解で即自動進行</p>
+                            <h1 className="text-2xl font-black text-white mb-1 text-center">🌑 裏もーど</h1>
+                            <p className="text-gray-400 text-xs mb-1 text-center">間違えた瞬間ゲームオーバー・全正解で即自動進行</p>
+                            <p className="text-gray-600 text-[10px] mb-3 text-center">各モードでS以上を獲得すると解放</p>
+
+                            {uraLockMsg && (
+                                <div className="text-center text-red-400 text-xs font-black py-1.5 bg-red-900/30 border border-red-800/50 rounded-lg mb-3">
+                                    ⚠ {uraLockMsg}
+                                </div>
+                            )}
 
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
                                     <DkDrillCard title="6枚形" buttons={
                                         <div className="flex gap-2 mb-2">
-                                            <DkBtn label="26問" onClick={() => startNewGame('ura', '6', 26)} />
+                                            <DkBtn label="26問" locked={!unlocked6} onClick={() => startNewGame('ura', '6', 26)} />
                                         </div>
                                     } />
                                     <DkDrillCard title="7枚形" buttons={
                                         <div className="flex gap-2 mb-2">
-                                            <DkBtn label="19問" onClick={() => startNewGame('ura', '7', 19)} />
+                                            <DkBtn label="19問" locked={!unlocked7} onClick={() => startNewGame('ura', '7', 19)} />
                                         </div>
                                     } />
                                 </div>
                                 <DkDrillCard title="10枚形" buttons={
                                     <div className="flex gap-2 mb-2">
-                                        <DkBtn label="ランダム20問" onClick={() => startNewGame('ura', '10', 20)} />
-                                        <DkBtn label="全82問" onClick={() => startNewGame('ura', '10', 82)} />
+                                        <DkBtn label="ランダム20問" locked={!unlocked10_20} onClick={() => startNewGame('ura', '10', 20)} />
+                                        <DkBtn label="全82問" locked={!unlocked10_all} onClick={() => startNewGame('ura', '10', 82)} />
                                     </div>
                                 } />
                             </div>
@@ -879,8 +898,28 @@
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-5 border border-slate-100">
-                            <h1 className="text-2xl font-black text-slate-800 mb-1 text-center">【多面待ちドリル】</h1>
-                            <p className="text-slate-400 text-xs mb-3 text-center">萬子・筒子・索子 ランダム出題</p>
+                            <div className="flex items-center justify-between mb-1">
+                                <div className="w-16"></div>
+                                <h1 className="text-2xl font-black text-slate-800 text-center">【多面待ちドリル】</h1>
+                                <button onClick={() => setUraMode(true)}
+                                    className="text-[10px] font-black text-gray-400 hover:text-gray-700 px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors whitespace-nowrap">
+                                    【裏もーど】
+                                </button>
+                            </div>
+                            <p className="text-slate-400 text-xs mb-2 text-center">萬子・筒子・索子 ランダム出題</p>
+
+                            <div className="flex gap-2 mb-3">
+                                <button onClick={reviewBucket.length > 0 ? startReviewGame : undefined}
+                                    className={`flex-1 py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${reviewBucket.length > 0 ? 'bg-rose-500 hover:bg-rose-600 text-white shadow active:scale-95' : 'bg-rose-100 text-rose-300 cursor-default'}`}>
+                                    🔄 復習
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white text-rose-500' : 'bg-rose-200 text-rose-300'}`}>{reviewBucket.length}</span>
+                                </button>
+                                <button onClick={favorites.length > 0 ? () => setShowFavorites(true) : undefined}
+                                    className={`flex-1 py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${favorites.length > 0 ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow active:scale-95' : 'bg-yellow-100 text-yellow-300 cursor-default'}`}>
+                                    ⭐ お気に入り
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-yellow-900 text-yellow-100' : 'bg-yellow-200 text-yellow-300'}`}>{favorites.length}</span>
+                                </button>
+                            </div>
 
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
@@ -926,29 +965,6 @@
                                     </>}
                                 />
                             </div>
-
-                            <div className="flex gap-2 mt-3">
-                                <button onClick={reviewBucket.length > 0 ? startReviewGame : undefined}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${reviewBucket.length > 0 ? 'bg-rose-500 hover:bg-rose-600 text-white shadow active:scale-95' : 'bg-rose-100 text-rose-300 cursor-default'}`}>
-                                    🔄 復習
-                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white text-rose-500' : 'bg-rose-200 text-rose-300'}`}>{reviewBucket.length}</span>
-                                </button>
-                                <button onClick={favorites.length > 0 ? () => setShowFavorites(true) : undefined}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${favorites.length > 0 ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow active:scale-95' : 'bg-yellow-100 text-yellow-300 cursor-default'}`}>
-                                    ⭐ お気に入り
-                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-yellow-900 text-yellow-100' : 'bg-yellow-200 text-yellow-300'}`}>{favorites.length}</span>
-                                </button>
-                            </div>
-                            <button
-                                onClick={isUraUnlocked ? () => setUraMode(true) : undefined}
-                                className={`w-full mt-3 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
-                                    isUraUnlocked
-                                        ? 'bg-gray-900 hover:bg-black text-white shadow active:scale-95'
-                                        : 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                                }`}>
-                                🌑 裏モード
-                                {!isUraUnlocked && <span className="text-xs font-normal">（全てA以上で解放）</span>}
-                            </button>
                         </div>
                     </div>
                 );
@@ -1253,9 +1269,9 @@
                             ))}
                         </div>
 
-                        {/* 確定ボタン / 正解表示（裏モードでは確定ボタン非表示） */}
+                        {/* 確定ボタン / 正解表示（裏モードでは非表示） */}
                         <div className="w-full max-w-[360px]">
-                            {!isSubmitted && !dark ? (
+                            {dark ? null : !isSubmitted ? (
                                 <button
                                     onClick={handleSubmit}
                                     disabled={selectedAnswers.length === 0}
