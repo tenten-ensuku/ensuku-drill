@@ -1278,7 +1278,7 @@
 
                         {/* 確定ボタン / 正解表示（裏モードでは非表示） */}
                         <div className="w-full max-w-[360px]">
-                            {dark ? null : !isSubmitted ? (
+                            {mode === 'ura' ? null : !isSubmitted ? (
                                 <button
                                     onClick={handleSubmit}
                                     disabled={selectedAnswers.length === 0}
