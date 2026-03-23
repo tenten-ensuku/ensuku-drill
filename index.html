@@ -411,6 +411,8 @@
             const [reviewBucket, setReviewBucket] = useState([]);
             const [showFavorites, setShowFavorites] = useState(false);
             const [lastResult, setLastResult] = useState(null); // null | 'correct' | 'incorrect'
+            const [uraMode, setUraMode] = useState(false);
+            const [uraGameOver, setUraGameOver] = useState(false);
 
             // 全スートの牌画像プリロード
             useEffect(() => {
@@ -456,10 +458,21 @@
                 return 'mahjong6_best';
             };
 
+            const URA_RANK_ORDER = ['E','D','C','B-','B','B+','A-','A','A+','S','SS'];
+            const isUraUnlocked = (() => {
+                const ok = (score, d, qc) => {
+                    if (score === -9999) return false;
+                    const { rank } = getRankInfo(score, d, qc);
+                    return URA_RANK_ORDER.indexOf(rank) >= URA_RANK_ORDER.indexOf('A');
+                };
+                return ok(bestScore6, '6') && ok(bestScore7, '7') && ok(bestScore10_20, '10', 20) && ok(bestScore10_all, '10', 82);
+            })();
+
             const startNewGame = (m, d, qc) => {
                 SoundEffect.playTap();
                 SoundEffect.init();
                 pendingStatsRef.current = null;
+                setUraGameOver(false);
 
                 const source =
                     d === '7'  ? ALL_PROBLEMS_7  :
@@ -515,6 +528,50 @@
 
             const toggleAnswer = (num) => {
                 if (isSubmitted) return;
+
+                if (mode === 'ura') {
+                    if (selectedAnswers.includes(num)) return; // 裏モードは選択解除不可
+                    const cp = problemStack[currentIdx];
+                    const correctSet = [...new Set(cp.answers)].sort((a, b) => a - b);
+
+                    if (!correctSet.includes(num)) {
+                        // 不正解牌 → 即ゲームオーバー
+                        SoundEffect.playIncorrect();
+                        setIncorrectCount(i => i + 1);
+                        setWrongLog(prev => [...prev, { problem: cp, userAnswers: [...selectedAnswers, num] }]);
+                        const key = JSON.stringify(cp.tiles) + cp.suit;
+                        setReviewBucket(prev => {
+                            if (prev.some(b => JSON.stringify(b.tiles) + b.suit === key)) return prev;
+                            const item = { id: Date.now(), tiles: cp.tiles, answers: cp.answers, suit: cp.suit };
+                            const updated = [...prev, item];
+                            localStorage.setItem('mahjong_review_bucket', JSON.stringify(updated));
+                            return updated;
+                        });
+                        setUraGameOver(true);
+                        setIsSubmitted(true);
+                        setIsFinished(true);
+                        return;
+                    }
+
+                    // 正解牌
+                    SoundEffect.playTap();
+                    const newSelected = [...selectedAnswers, num].sort((a, b) => a - b);
+                    setSelectedAnswers(newSelected);
+
+                    if (JSON.stringify(newSelected) === JSON.stringify(correctSet)) {
+                        // 全正解 → 即自動進行
+                        SoundEffect.playCorrect();
+                        const nextC = correctCount + 1;
+                        const nextI = incorrectCount;
+                        setCorrectCount(c => c + 1);
+                        pendingStatsRef.current = { correct: nextC, incorrect: nextI };
+                        setLastResult('correct');
+                        setTimeout(() => nextQuestion(nextC, nextI), 0);
+                        setTimeout(() => setLastResult(null), 500);
+                    }
+                    return;
+                }
+
                 SoundEffect.playTap();
                 setSelectedAnswers(prev =>
                     prev.includes(num) ? prev.filter(n => n !== num) : [...prev, num].sort((a, b) => a - b)
@@ -585,7 +642,7 @@
                 const c = pending ? pending.correct   : (finalCorrect   !== undefined ? finalCorrect   : correctCount);
                 const i = pending ? pending.incorrect : (finalIncorrect !== undefined ? finalIncorrect : incorrectCount);
                 pendingStatsRef.current = null;
-                if (mode === 'review') { setIsFinished(true); return; }
+                if (mode === 'review' || mode === 'ura') { setIsFinished(true); return; }
 
                 const elapsed = startTime != null ? Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
                 const score   = (c * 10) - (i * 10) - elapsed;
@@ -717,6 +774,71 @@
                 );
             }
 
+            // ========== 裏モードホーム画面 ==========
+            if (!drill && uraMode) {
+                const dkColor6  = { border: 'border-gray-600', bg: 'bg-gray-800', title: 'text-gray-100', sub: 'text-gray-400', btn2: 'bg-gray-600 hover:bg-gray-500', bestBg: 'bg-gray-700 border border-gray-600' };
+                const dkColor7  = { border: 'border-gray-600', bg: 'bg-gray-800', title: 'text-gray-100', sub: 'text-gray-400', btn2: 'bg-gray-600 hover:bg-gray-500', bestBg: 'bg-gray-700 border border-gray-600' };
+                const dkColor10 = { border: 'border-gray-600', bg: 'bg-gray-800', title: 'text-gray-100', sub: 'text-gray-400', btn2: 'bg-gray-600 hover:bg-gray-500', bestBg: 'bg-gray-700 border border-gray-600' };
+                const DkDrillCard = ({ title, buttons }) => (
+                    <div className="rounded-2xl border-2 border-gray-600 bg-gray-800 p-3">
+                        <div className="mb-2 font-black text-base text-gray-100">{title}</div>
+                        {buttons}
+                    </div>
+                );
+                const DkBtn = ({ label, onClick }) => (
+                    <button onClick={onClick}
+                        className="flex-1 py-3 bg-gray-600 hover:bg-gray-500 text-white rounded-xl font-bold text-sm transition-all active:scale-95">
+                        {label}
+                    </button>
+                );
+                return (
+                    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+                        <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-5 border border-gray-700">
+                            <h1 className="text-2xl font-black text-white mb-1 text-center">🌑 裏モード</h1>
+                            <p className="text-gray-400 text-xs mb-3 text-center">間違えた瞬間ゲームオーバー・全正解で即自動進行</p>
+
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <DkDrillCard title="6枚形" buttons={
+                                        <div className="flex gap-2 mb-2">
+                                            <DkBtn label="26問" onClick={() => startNewGame('ura', '6', 26)} />
+                                        </div>
+                                    } />
+                                    <DkDrillCard title="7枚形" buttons={
+                                        <div className="flex gap-2 mb-2">
+                                            <DkBtn label="19問" onClick={() => startNewGame('ura', '7', 19)} />
+                                        </div>
+                                    } />
+                                </div>
+                                <DkDrillCard title="10枚形" buttons={
+                                    <div className="flex gap-2 mb-2">
+                                        <DkBtn label="ランダム20問" onClick={() => startNewGame('ura', '10', 20)} />
+                                        <DkBtn label="全82問" onClick={() => startNewGame('ura', '10', 82)} />
+                                    </div>
+                                } />
+                            </div>
+
+                            <div className="flex gap-2 mt-3">
+                                <button onClick={reviewBucket.length > 0 ? startReviewGame : undefined}
+                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${reviewBucket.length > 0 ? 'bg-gray-700 hover:bg-gray-600 text-white shadow active:scale-95' : 'bg-gray-800 text-gray-600 cursor-default'}`}>
+                                    🔄 復習
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white text-gray-800' : 'bg-gray-700 text-gray-600'}`}>{reviewBucket.length}</span>
+                                </button>
+                                <button onClick={favorites.length > 0 ? () => setShowFavorites(true) : undefined}
+                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${favorites.length > 0 ? 'bg-yellow-600 hover:bg-yellow-500 text-white shadow active:scale-95' : 'bg-gray-800 text-gray-600 cursor-default'}`}>
+                                    ⭐ お気に入り
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-white text-yellow-700' : 'bg-gray-700 text-gray-600'}`}>{favorites.length}</span>
+                                </button>
+                            </div>
+                            <button onClick={() => setUraMode(false)}
+                                className="w-full mt-3 py-2.5 rounded-xl font-bold text-sm text-gray-500 hover:text-gray-300 transition-colors">
+                                ← 通常モードに戻る
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
             // ========== ホーム画面 ==========
             if (!drill) {
                 const DrillCard = ({ d, title, color, buttons }) => {
@@ -817,6 +939,70 @@
                                     <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-yellow-900 text-yellow-100' : 'bg-yellow-200 text-yellow-300'}`}>{favorites.length}</span>
                                 </button>
                             </div>
+                            <button
+                                onClick={isUraUnlocked ? () => setUraMode(true) : undefined}
+                                className={`w-full mt-3 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                                    isUraUnlocked
+                                        ? 'bg-gray-900 hover:bg-black text-white shadow active:scale-95'
+                                        : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                                }`}>
+                                🌑 裏モード
+                                {!isUraUnlocked && <span className="text-xs font-normal">（全てA以上で解放）</span>}
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // ========== 裏モード：ゲームオーバー画面 ==========
+            if (isFinished && mode === 'ura' && uraGameOver) {
+                return (
+                    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+                        <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-8 text-center border border-gray-700">
+                            <div className="text-7xl mb-4">💀</div>
+                            <h2 className="text-4xl font-black text-white mb-1 tracking-widest">GAME OVER</h2>
+                            <p className="text-gray-400 text-sm mb-6">{currentIdx + 1}問目で終了</p>
+                            <div className="grid grid-cols-2 gap-3 mb-6">
+                                <div className="bg-gray-800 border border-gray-600 rounded-2xl p-3">
+                                    <div className="text-green-400 font-black text-3xl">{correctCount}</div>
+                                    <div className="text-gray-400 font-bold text-xs mt-1">正解</div>
+                                </div>
+                                <div className="bg-gray-800 border border-red-900 rounded-2xl p-3">
+                                    <div className="text-red-400 font-black text-3xl">{elapsedTime}s</div>
+                                    <div className="text-gray-400 font-bold text-xs mt-1">経過時間</div>
+                                </div>
+                            </div>
+                            <button onClick={resetToHome}
+                                className="w-full py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-2xl font-black text-lg transition-all active:scale-95">
+                                裏モードホームへ
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // ========== 裏モード：クリア画面 ==========
+            if (isFinished && mode === 'ura' && !uraGameOver) {
+                return (
+                    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+                        <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-8 text-center border border-gray-700">
+                            <div className="text-7xl mb-4">🌑</div>
+                            <h2 className="text-4xl font-black text-white mb-1 tracking-widest">CLEAR</h2>
+                            <p className="text-gray-400 text-sm mb-6">全問ノーミス達成！</p>
+                            <div className="grid grid-cols-2 gap-3 mb-6">
+                                <div className="bg-gray-800 border border-gray-600 rounded-2xl p-3">
+                                    <div className="text-green-400 font-black text-3xl">{correctCount}</div>
+                                    <div className="text-gray-400 font-bold text-xs mt-1">全問正解</div>
+                                </div>
+                                <div className="bg-gray-800 border border-gray-600 rounded-2xl p-3">
+                                    <div className="text-white font-black text-3xl">{elapsedTime}s</div>
+                                    <div className="text-gray-400 font-bold text-xs mt-1">クリアタイム</div>
+                                </div>
+                            </div>
+                            <button onClick={resetToHome}
+                                className="w-full py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-2xl font-black text-lg transition-all active:scale-95">
+                                裏モードホームへ
+                            </button>
                         </div>
                     </div>
                 );
@@ -980,9 +1166,10 @@
             const currentProblem = problemStack[currentIdx];
             const tileCount      = currentProblem ? currentProblem.tiles.length : 6;
             const scaleClass     = tileCount >= 10 ? '' : 'scale-110 sm:scale-125';
+            const dark = mode === 'ura';
 
             return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col relative">
+                <div className={`max-w-md mx-auto min-h-screen flex flex-col relative ${dark ? 'bg-gray-950' : 'bg-slate-50'}`}>
                     {/* ○✕ オーバーレイ（タイムアタック用） */}
                     {lastResult && (
                         <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[100]">
@@ -999,11 +1186,11 @@
                             </div>
                         </div>
                     )}
-                    <div className="bg-white px-4 py-3 flex justify-between items-center shadow-sm border-b border-slate-100 sticky top-0 z-50">
-                        <div className="font-bold text-slate-400 text-sm w-16">{currentIdx + 1} / {problemStack.length}</div>
+                    <div className={`px-4 py-3 flex justify-between items-center shadow-sm sticky top-0 z-50 ${dark ? 'bg-gray-900 border-b border-gray-700' : 'bg-white border-b border-slate-100'}`}>
+                        <div className={`font-bold text-sm w-16 ${dark ? 'text-gray-400' : 'text-slate-400'}`}>{currentIdx + 1} / {problemStack.length}</div>
 
                         <button onClick={resetToHome}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors">
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${dark ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}`}>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
@@ -1049,11 +1236,13 @@
                                 <button
                                     key={n}
                                     onClick={() => toggleAnswer(n)}
-                                    disabled={isSubmitted}
+                                    disabled={isSubmitted && !dark}
                                     className={`aspect-video rounded-xl flex items-center justify-center text-4xl font-black transition-all
                                         ${selectedAnswers.includes(n)
-                                            ? 'bg-indigo-600 text-white scale-95 shadow-inner'
-                                            : 'bg-white text-slate-700 border-2 border-slate-200 shadow-sm'}
+                                            ? 'bg-indigo-500 text-white scale-95 shadow-inner'
+                                            : dark
+                                                ? 'bg-gray-800 text-gray-100 border-2 border-gray-600 shadow-sm'
+                                                : 'bg-white text-slate-700 border-2 border-slate-200 shadow-sm'}
                                         ${isSubmitted && currentProblem.answers.includes(n)
                                             ? 'ring-4 ring-yellow-400 z-10'
                                             : ''}
@@ -1064,9 +1253,9 @@
                             ))}
                         </div>
 
-                        {/* 確定ボタン / 正解表示 */}
+                        {/* 確定ボタン / 正解表示（裏モードでは確定ボタン非表示） */}
                         <div className="w-full max-w-[360px]">
-                            {!isSubmitted ? (
+                            {!isSubmitted && !dark ? (
                                 <button
                                     onClick={handleSubmit}
                                     disabled={selectedAnswers.length === 0}
