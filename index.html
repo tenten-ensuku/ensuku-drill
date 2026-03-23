@@ -136,7 +136,7 @@
                 };
             });
 
-        // --- 6枚形 問題データ（26問）---
+        // --- 6枚形 問題データ（13問・各ユニーク形の代表）---
         const ALL_PROBLEMS_6 = parseData(`
             334556-347
             344568-257
@@ -151,19 +151,6 @@
             134568-27
             344567-2458
             234446-145
-            677899-589
-            356778-469
-            244566-35
-            566777-45678
-            345677-2578
-            445666-3456
-            345566-467
-            455566-4567
-            456667-3568
-            134566-26
-            245679-38
-            567889-478
-            133345-236
         `);
 
         // --- 7枚形 問題データ（19問）---
@@ -275,6 +262,17 @@
             2333345678-14258
         `);
 
+        // --- シフト可能範囲計算（端牌が1か9になるまで、かつ-3〜+3）---
+        const getValidShifts = (tiles) => {
+            const minTile = Math.min(...tiles);
+            const maxTile = Math.max(...tiles);
+            const minK = Math.max(-3, 1 - minTile);
+            const maxK = Math.min(3, 9 - maxTile);
+            const shifts = [];
+            for (let k = minK; k <= maxK; k++) shifts.push(k);
+            return shifts;
+        };
+
         // --- ランク定義 ---
         const getRankInfo = (score, drill, qCount) => {
             if (drill === '10') {
@@ -318,17 +316,17 @@
                 if (score >= 30)  return { rank: 'D',  color: 'text-black',    comment: '7枚形が仲間になりたそうにコチラを見ている' };
                 return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの7枚形のようだ。' };
             }
-            // 6枚形
-            if (score >= 210) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
-            if (score >= 200) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
-            if (score >= 190) return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
-            if (score >= 180) return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんの昼間の麻雀だ' };
-            if (score >= 170) return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
-            if (score >= 160) return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
-            if (score >= 150) return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
-            if (score >= 140) return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
-            if (score >= 100) return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
-            if (score >= 51)  return { rank: 'D',  color: 'text-black',    comment: '6枚形が仲間になりたそうにコチラを見ている' };
+            // 6枚形（13問・最大130pt）
+            if (score >= 100) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+            if (score >= 85)  return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+            if (score >= 70)  return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+            if (score >= 55)  return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんの昼間の麻雀だ' };
+            if (score >= 40)  return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
+            if (score >= 25)  return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
+            if (score >= 10)  return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+            if (score >= 0)   return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
+            if (score >= -40) return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
+            if (score >= -80) return { rank: 'D',  color: 'text-black',    comment: '6枚形が仲間になりたそうにコチラを見ている' };
             return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの6枚形のようだ。' };
         };
 
@@ -483,9 +481,18 @@
                 const stack = selected.map(p => {
                     const suit     = SUITS[Math.floor(Math.random() * 3)];
                     const reversed = Math.random() < 0.5;
-                    return reversed
-                        ? { ...p, suit, tiles: p.tiles.map(mirror), answers: p.answers.map(mirror) }
-                        : { ...p, suit };
+                    const tilesM   = reversed ? p.tiles.map(mirror)   : p.tiles;
+                    const answersM = reversed ? p.answers.map(mirror) : p.answers;
+                    if (d === '6') {
+                        const validShifts = getValidShifts(tilesM);
+                        const k = validShifts[Math.floor(Math.random() * validShifts.length)];
+                        return {
+                            ...p, suit,
+                            tiles:   tilesM.map(n => n + k),
+                            answers: answersM.map(n => n + k).filter(n => n >= 1 && n <= 9)
+                        };
+                    }
+                    return { ...p, suit, tiles: tilesM, answers: answersM };
                 });
 
                 setProblemStack(stack);
@@ -840,7 +847,7 @@
                                 <div className="grid grid-cols-2 gap-3">
                                     <UCard title="6枚形" color={uColor6}>
                                         <div className="flex gap-2 mb-2">
-                                            <UBtn label="26問" locked={!unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 26)} />
+                                            <UBtn label="13問" locked={!unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 13)} />
                                         </div>
                                         <UBest score={bestScore6} drill="6" color={uColor6} />
                                     </UCard>
@@ -948,9 +955,9 @@
                                     <DrillCard d="6" title="6枚形" color={color6}
                                         buttons={<>
                                             <div className="flex gap-2 mb-3">
-                                                <button onClick={() => startNewGame('timeattack', '6', 26)}
+                                                <button onClick={() => startNewGame('timeattack', '6', 13)}
                                                     className={`flex-1 py-3 ${color6.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
-                                                    26問
+                                                    13問
                                                 </button>
                                             </div>
                                             <BestBadge score={bestScore6} drill="6" color={color6} />
