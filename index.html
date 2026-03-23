@@ -825,23 +825,43 @@
 
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
-                                    <DkDrillCard title="6枚形" buttons={
+                                    <DkDrillCard title="6枚形" buttons={<>
                                         <div className="flex gap-2 mb-2">
                                             <DkBtn label="26問" locked={!unlocked6} onClick={() => startNewGame('ura', '6', 26)} />
                                         </div>
-                                    } />
-                                    <DkDrillCard title="7枚形" buttons={
+                                        {bestScore6 !== -9999 && <div className="bg-gray-700 border border-gray-600 rounded-xl py-1.5 px-2 text-center">
+                                            <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">自己ベスト</div>
+                                            <BestScoreDisplay score={bestScore6} drill="6" size="sm" />
+                                        </div>}
+                                    </>} />
+                                    <DkDrillCard title="7枚形" buttons={<>
                                         <div className="flex gap-2 mb-2">
                                             <DkBtn label="19問" locked={!unlocked7} onClick={() => startNewGame('ura', '7', 19)} />
                                         </div>
-                                    } />
+                                        {bestScore7 !== -9999 && <div className="bg-gray-700 border border-gray-600 rounded-xl py-1.5 px-2 text-center">
+                                            <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">自己ベスト</div>
+                                            <BestScoreDisplay score={bestScore7} drill="7" size="sm" />
+                                        </div>}
+                                    </>} />
                                 </div>
-                                <DkDrillCard title="10枚形" buttons={
+                                <DkDrillCard title="10枚形" buttons={<>
                                     <div className="flex gap-2 mb-2">
                                         <DkBtn label="ランダム20問" locked={!unlocked10_20} onClick={() => startNewGame('ura', '10', 20)} />
                                         <DkBtn label="全82問" locked={!unlocked10_all} onClick={() => startNewGame('ura', '10', 82)} />
                                     </div>
-                                } />
+                                    {(bestScore10_20 !== -9999 || bestScore10_all !== -9999) && (
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {bestScore10_20 !== -9999 && <div className="bg-gray-700 border border-gray-600 rounded-xl py-1.5 px-2 text-center">
+                                                <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">20問</div>
+                                                <BestScoreDisplay score={bestScore10_20} drill="10" qCount={20} size="sm" />
+                                            </div>}
+                                            {bestScore10_all !== -9999 && <div className="bg-gray-700 border border-gray-600 rounded-xl py-1.5 px-2 text-center">
+                                                <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">全82問</div>
+                                                <BestScoreDisplay score={bestScore10_all} drill="10" qCount={82} size="sm" />
+                                            </div>}
+                                        </div>
+                                    )}
+                                </>} />
                             </div>
 
                             <div className="flex gap-2 mt-3">
