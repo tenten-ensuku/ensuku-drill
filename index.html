@@ -1189,22 +1189,6 @@
 
             return (
                 <div className={`max-w-md mx-auto min-h-screen flex flex-col relative ${dark ? 'bg-gray-950' : 'bg-slate-50'}`}>
-                    {/* ○✕ オーバーレイ（タイムアタック用） */}
-                    {lastResult && (
-                        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[100]">
-                            <div style={{
-                                fontSize: '160px',
-                                fontWeight: 900,
-                                lineHeight: 1,
-                                color: lastResult === 'correct' ? '#22c55e' : '#ef4444',
-                                opacity: 0.85,
-                                textShadow: '0 4px 24px rgba(0,0,0,0.18)',
-                                animation: 'resultPop 0.15s ease-out',
-                            }}>
-                                {lastResult === 'correct' ? '○' : '✕'}
-                            </div>
-                        </div>
-                    )}
                     <div className={`px-4 py-3 flex justify-between items-center shadow-sm sticky top-0 z-50 ${dark ? 'bg-gray-900 border-b border-gray-700' : 'bg-white border-b border-slate-100'}`}>
                         <div className={`font-bold text-sm w-16 ${dark ? 'text-gray-400' : 'text-slate-400'}`}>{currentIdx + 1} / {problemStack.length}</div>
 
@@ -1253,6 +1237,20 @@
                                     </div>
                                 );
                             })}
+                        </div>
+
+                        {/* ○✕ 小インジケーター（1ボタンの上） */}
+                        <div className="w-full max-w-[360px] h-7 flex items-center mb-1">
+                            {lastResult && (
+                                <span style={{
+                                    fontSize: '22px',
+                                    fontWeight: 900,
+                                    lineHeight: 1,
+                                    color: lastResult === 'correct' ? '#ef4444' : '#3b82f6',
+                                }}>
+                                    {lastResult === 'correct' ? '○' : '✕'}
+                                </span>
+                            )}
                         </div>
 
                         {/* 回答ボタン 1〜9 */}
