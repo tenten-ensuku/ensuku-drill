@@ -719,12 +719,11 @@
 
             // ========== ホーム画面 ==========
             if (!drill) {
-                const DrillCard = ({ d, title, question, color, buttons }) => {
+                const DrillCard = ({ d, title, color, buttons }) => {
                     return (
-                        <div className={`rounded-2xl border-2 ${color.border} ${color.bg} p-5`}>
-                            <div className="mb-3">
-                                <div className={`font-black text-xl ${color.title}`}>{title}</div>
-                                <div className={`text-xs ${color.sub}`}>{question}</div>
+                        <div className={`rounded-2xl border-2 ${color.border} ${color.bg} p-3`}>
+                            <div className="mb-2">
+                                <div className={`font-black text-base ${color.title}`}>{title}</div>
                             </div>
                             {buttons}
                         </div>
@@ -757,32 +756,36 @@
 
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4">
-                        <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-8 border border-slate-100">
-                            <h1 className="text-3xl font-black text-slate-800 mb-1 text-center">【多面待ちドリル】</h1>
-                            <p className="text-slate-400 text-xs mb-6 text-center">萬子・筒子・索子 ランダム出題</p>
+                        <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-5 border border-slate-100">
+                            <h1 className="text-2xl font-black text-slate-800 mb-1 text-center">【多面待ちドリル】</h1>
+                            <p className="text-slate-400 text-xs mb-3 text-center">萬子・筒子・索子 ランダム出題</p>
 
-                            <div className="space-y-4">
-                                <DrillCard d="6" title="6枚形" question="何を引いたら二面子できる？" color={color6}
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <DrillCard d="6" title="6枚形" color={color6}
+                                        buttons={<>
+                                            <TwoButtonRow d="6" color={color6} />
+                                            <BestBadge score={bestScore6} drill="6" color={color6} />
+                                        </>}
+                                    />
+                                    <DrillCard d="7" title="7枚形" color={color7}
+                                        buttons={<>
+                                            <TwoButtonRow d="7" color={color7} />
+                                            <BestBadge score={bestScore7} drill="7" color={color7} />
+                                        </>}
+                                    />
+                                </div>
+                                <DrillCard d="10" title="10枚形" color={color10}
                                     buttons={<>
-                                        <TwoButtonRow d="6" color={color6} />
-                                        <BestBadge score={bestScore6} drill="6" color={color6} />
-                                    </>}
-                                />
-                                <DrillCard d="7" title="7枚形" question="何を引いたら2面子１雀頭できる？（何待ち？）" color={color7}
-                                    buttons={<>
-                                        <TwoButtonRow d="7" color={color7} />
-                                        <BestBadge score={bestScore7} drill="7" color={color7} />
-                                    </>}
-                                />
-                                <DrillCard d="10" title="10枚形" question="何を引いたら3面子１雀頭できる？（何待ち？）" color={color10}
-                                    buttons={<>
-                                        <div className="mb-1">
-                                            <div className="text-[10px] text-violet-400 font-bold mb-1">20問ランダム</div>
-                                            <TwoButtonRow d="10" qc={20} color={color10} />
-                                        </div>
-                                        <div className="mb-3">
-                                            <div className="text-[10px] text-violet-400 font-bold mb-1">全82問</div>
-                                            <TwoButtonRow d="10" qc={82} color={color10} />
+                                        <div className="flex gap-2 mb-3">
+                                            <button onClick={() => startNewGame('timeattack', '10', 20)}
+                                                className={`flex-1 py-3 ${color10.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                                20問
+                                            </button>
+                                            <button onClick={() => startNewGame('timeattack', '10', 82)}
+                                                className={`flex-1 py-3 ${color10.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                                全82問
+                                            </button>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <BestBadge score={bestScore10_20}  drill="10" qCount={20} label="20問" color={color10} />
@@ -792,20 +795,18 @@
                                 />
                             </div>
 
-                            {reviewBucket.length > 0 && (
-                                <button onClick={startReviewGame}
-                                    className="w-full mt-4 py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-black text-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
-                                    🔄 復習バケット
-                                    <span className="bg-white text-rose-500 text-sm font-black px-2 py-0.5 rounded-full">{reviewBucket.length}問</span>
+                            <div className="flex gap-2 mt-3">
+                                <button onClick={reviewBucket.length > 0 ? startReviewGame : undefined}
+                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${reviewBucket.length > 0 ? 'bg-rose-500 hover:bg-rose-600 text-white shadow active:scale-95' : 'bg-rose-100 text-rose-300 cursor-default'}`}>
+                                    🔄 復習
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white text-rose-500' : 'bg-rose-200 text-rose-300'}`}>{reviewBucket.length}</span>
                                 </button>
-                            )}
-                            {favorites.length > 0 && (
-                                <button onClick={() => setShowFavorites(true)}
-                                    className="w-full mt-3 py-4 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-2xl font-black text-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                                <button onClick={favorites.length > 0 ? () => setShowFavorites(true) : undefined}
+                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${favorites.length > 0 ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow active:scale-95' : 'bg-yellow-100 text-yellow-300 cursor-default'}`}>
                                     ⭐ お気に入り
-                                    <span className="bg-yellow-900 text-yellow-100 text-sm font-black px-2 py-0.5 rounded-full">{favorites.length}問</span>
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-yellow-900 text-yellow-100' : 'bg-yellow-200 text-yellow-300'}`}>{favorites.length}</span>
                                 </button>
-                            )}
+                            </div>
                         </div>
                     </div>
                 );
