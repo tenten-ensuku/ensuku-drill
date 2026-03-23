@@ -383,6 +383,17 @@
             );
         };
 
+        // --- ベストスコア詳細ロード（後方互換） ---
+        const loadBestStats = (key) => {
+            try {
+                const v = localStorage.getItem(key);
+                if (!v) return null;
+                const parsed = JSON.parse(v);
+                if (typeof parsed === 'number') return { score: parsed, correct: null, incorrect: null, elapsed: null };
+                return parsed;
+            } catch (_) { return null; }
+        };
+
         // --- メインアプリ ---
         function App() {
             const [drill, setDrill]     = useState(null); // null | '6' | '7' | '10'
@@ -399,6 +410,10 @@
             const [bestScore7, setBestScore7]       = useState(-9999);
             const [bestScore10_20, setBestScore10_20] = useState(-9999);
             const [bestScore10_all, setBestScore10_all] = useState(-9999);
+            const [bestStats6,      setBestStats6]      = useState(() => loadBestStats('mahjong6_best'));
+            const [bestStats7,      setBestStats7]      = useState(() => loadBestStats('mahjong7_best'));
+            const [bestStats10_20,  setBestStats10_20]  = useState(() => loadBestStats('mahjong10_best_20'));
+            const [bestStats10_all, setBestStats10_all] = useState(() => loadBestStats('mahjong10_best_82'));
             const [isNewRecord, setIsNewRecord]     = useState(false);
             const [startTime, setStartTime]         = useState(null);
             const [elapsedTime, setElapsedTime]     = useState(0);
@@ -436,14 +451,15 @@
             }, []);
 
             useEffect(() => {
+                const parseScore = (v) => { if (!v) return -9999; try { const p = JSON.parse(v); return typeof p === 'number' ? p : (p?.score ?? -9999); } catch { return -9999; } };
                 const s6  = localStorage.getItem('mahjong6_best');
                 const s7  = localStorage.getItem('mahjong7_best');
                 const s10_20  = localStorage.getItem('mahjong10_best_20');
                 const s10_all = localStorage.getItem('mahjong10_best_82');
-                if (s6  !== null) setBestScore6(parseInt(s6));
-                if (s7  !== null) setBestScore7(parseInt(s7));
-                if (s10_20  !== null) setBestScore10_20(parseInt(s10_20));
-                if (s10_all !== null) setBestScore10_all(parseInt(s10_all));
+                if (s6  !== null) setBestScore6(parseScore(s6));
+                if (s7  !== null) setBestScore7(parseScore(s7));
+                if (s10_20  !== null) setBestScore10_20(parseScore(s10_20));
+                if (s10_all !== null) setBestScore10_all(parseScore(s10_all));
             }, []);
 
             const getBestScore = (d, qc) => {
@@ -653,15 +669,16 @@
                 const score   = (c * 10) - (i * 10) - elapsed;
 
                 const key         = getLsKey(drill, questionCount);
-                const savedBest   = (() => { try { const v = localStorage.getItem(key); return v != null ? parseInt(v, 10) : -9999; } catch (_) { return -9999; } })();
+                const savedBest   = (() => { try { const v = localStorage.getItem(key); if (!v) return -9999; const p = JSON.parse(v); return typeof p === 'number' ? p : (p?.score ?? -9999); } catch (_) { return -9999; } })();
                 const currentBest = Math.max(getBestScore(drill, questionCount), savedBest);
 
                 if (score > currentBest) {
-                    if (drill === '7')              setBestScore7(score);
-                    else if (drill === '10' && questionCount === 20)  setBestScore10_20(score);
-                    else if (drill === '10')         setBestScore10_all(score);
-                    else                             setBestScore6(score);
-                    localStorage.setItem(key, score.toString());
+                    const statsObj = { score, correct: c, incorrect: i, elapsed };
+                    if (drill === '7')             { setBestScore7(score);       setBestStats7(statsObj); }
+                    else if (drill === '10' && questionCount === 20)  { setBestScore10_20(score);  setBestStats10_20(statsObj); }
+                    else if (drill === '10')        { setBestScore10_all(score); setBestStats10_all(statsObj); }
+                    else                            { setBestScore6(score);      setBestStats6(statsObj); }
+                    localStorage.setItem(key, JSON.stringify(statsObj));
                     setIsNewRecord(true);
                 }
                 setIsFinished(true);
@@ -786,15 +803,10 @@
                 const unlocked10_20  = isRankSOrAbove(bestScore10_20, '10', 20);
                 const unlocked10_all = isRankSOrAbove(bestScore10_all, '10', 82);
 
-                const uColor6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  bestBg: 'bg-white border border-indigo-100',  btn2: 'bg-orange-400 hover:bg-orange-500' };
-                const uColor7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', bestBg: 'bg-white border border-emerald-100', btn2: 'bg-orange-400 hover:bg-orange-500' };
-                const uColor10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  bestBg: 'bg-white border border-violet-100',  btn2: 'bg-orange-400 hover:bg-orange-500' };
-                const UCard = ({ title, color, children }) => (
-                    <div className={`rounded-2xl border-2 ${color.border} ${color.bg} p-3`}>
-                        <div className={`mb-2 font-black text-base text-center ${color.title}`}>{title}</div>
-                        {children}
-                    </div>
-                );
+                const uColor6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  btn2: 'bg-orange-400 hover:bg-orange-500' };
+                const uColor7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', btn2: 'bg-orange-400 hover:bg-orange-500' };
+                const uColor10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  btn2: 'bg-orange-400 hover:bg-orange-500' };
+
                 const UBtn = ({ label, onClick, locked, color }) => (
                     <button
                         onClick={locked ? () => {
@@ -813,12 +825,26 @@
                         {label}
                     </button>
                 );
-                const UBest = ({ score, drill, qCount, label, color }) => {
-                    if (score === -9999) return null;
+
+                const UScoreDetail = ({ stats, drill: d, qCount }) => {
+                    if (!stats) return <div className="w-[88px] shrink-0" />;
+                    const { score, correct, incorrect, elapsed } = stats;
+                    const { rank, color } = getRankInfo(score, d, qCount);
+                    const perQ = (elapsed != null && qCount) ? (elapsed / qCount).toFixed(1) : null;
                     return (
-                        <div className={`${color.bestBg} rounded-xl py-1.5 px-3 text-center`}>
-                            {label && <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{label}</div>}
-                            <BestScoreDisplay score={score} drill={drill} qCount={qCount} size="sm" />
+                        <div className="w-[88px] shrink-0 flex items-center gap-1.5">
+                            <div className="text-center w-12">
+                                <div className={`text-lg font-black italic ${color}`}>{rank}</div>
+                                <div className="text-xs font-black text-slate-600">{score}<span className="text-[9px]">pt</span></div>
+                            </div>
+                            {correct != null && (
+                                <div className="text-[9px] text-slate-400 font-bold leading-snug">
+                                    <div>正解+{correct * 10}</div>
+                                    <div>ミス-{incorrect * 10}</div>
+                                    <div>時間-{elapsed}</div>
+                                    {perQ && <div>1問{perQ}s</div>}
+                                </div>
+                            )}
                         </div>
                     );
                 };
@@ -843,30 +869,31 @@
                             )}
 
                             <div className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <UCard title="6枚形" color={uColor6}>
-                                        <div className="flex gap-2 mb-2">
-                                            <UBtn label="13問" locked={!unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 13)} />
-                                        </div>
-                                        <UBest score={bestScore6} drill="6" color={uColor6} />
-                                    </UCard>
-                                    <UCard title="7枚形" color={uColor7}>
-                                        <div className="flex gap-2 mb-2">
-                                            <UBtn label="19問" locked={!unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
-                                        </div>
-                                        <UBest score={bestScore7} drill="7" color={uColor7} />
-                                    </UCard>
+                                {/* 6枚形 */}
+                                <div className={`rounded-2xl border-2 ${uColor6.border} ${uColor6.bg} p-3`}>
+                                    <div className="flex items-center gap-2">
+                                        <UBtn label="6枚形　13問" locked={!unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 13)} />
+                                        <UScoreDetail stats={bestStats6} drill="6" qCount={13} />
+                                    </div>
                                 </div>
-                                <UCard title="10枚形" color={uColor10}>
-                                    <div className="flex gap-2 mb-2">
-                                        <UBtn label="ランダム20問" locked={!unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
-                                        <UBtn label="全82問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 82)} />
+                                {/* 7枚形 */}
+                                <div className={`rounded-2xl border-2 ${uColor7.border} ${uColor7.bg} p-3`}>
+                                    <div className="flex items-center gap-2">
+                                        <UBtn label="7枚形　19問" locked={!unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
+                                        <UScoreDetail stats={bestStats7} drill="7" qCount={19} />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <UBest score={bestScore10_20}  drill="10" qCount={20}  color={uColor10} />
-                                        <UBest score={bestScore10_all} drill="10" qCount={82}  color={uColor10} />
+                                </div>
+                                {/* 10枚形 */}
+                                <div className={`rounded-2xl border-2 ${uColor10.border} ${uColor10.bg} p-3 space-y-2`}>
+                                    <div className="flex items-center gap-2">
+                                        <UBtn label="10枚形　ランダム20問" locked={!unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
+                                        <UScoreDetail stats={bestStats10_20} drill="10" qCount={20} />
                                     </div>
-                                </UCard>
+                                    <div className="flex items-center gap-2">
+                                        <UBtn label="10枚形　全82問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 82)} />
+                                        <UScoreDetail stats={bestStats10_all} drill="10" qCount={82} />
+                                    </div>
+                                </div>
                             </div>
 
                             <hr className="border-gray-600 mt-3" />
@@ -889,39 +916,32 @@
 
             // ========== ホーム画面 ==========
             if (!drill) {
-                const DrillCard = ({ d, title, color, buttons }) => {
+                const color6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  btn2: 'bg-orange-400 hover:bg-orange-500' };
+                const color7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', btn2: 'bg-orange-400 hover:bg-orange-500' };
+                const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  btn2: 'bg-orange-400 hover:bg-orange-500' };
+
+                const ScoreDetail = ({ stats, drill: d, qCount }) => {
+                    if (!stats) return <div className="w-[88px] shrink-0" />;
+                    const { score, correct, incorrect, elapsed } = stats;
+                    const { rank, color } = getRankInfo(score, d, qCount);
+                    const perQ = (elapsed != null && qCount) ? (elapsed / qCount).toFixed(1) : null;
                     return (
-                        <div className={`rounded-2xl border-2 ${color.border} ${color.bg} p-3`}>
-                            <div className="mb-2 text-center">
-                                <div className={`font-black text-base ${color.title}`}>{title}</div>
+                        <div className="w-[88px] shrink-0 flex items-center gap-1.5">
+                            <div className="text-center w-12">
+                                <div className={`text-lg font-black italic ${color}`}>{rank}</div>
+                                <div className="text-xs font-black text-slate-600">{score}<span className="text-[9px]">pt</span></div>
                             </div>
-                            {buttons}
+                            {correct != null && (
+                                <div className="text-[9px] text-slate-400 font-bold leading-snug">
+                                    <div>正解+{correct * 10}</div>
+                                    <div>ミス-{incorrect * 10}</div>
+                                    <div>時間-{elapsed}</div>
+                                    {perQ && <div>1問{perQ}s</div>}
+                                </div>
+                            )}
                         </div>
                     );
                 };
-
-                const TwoButtonRow = ({ d, qc, color }) => (
-                    <div className="flex gap-2 mb-3">
-                        <button onClick={() => startNewGame('timeattack', d, qc)}
-                            className={`flex-1 py-5 ${color.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
-                            タイムアタック
-                        </button>
-                    </div>
-                );
-
-                const BestBadge = ({ score, drill, qCount, label, color }) => {
-                    if (score === -9999) return null;
-                    return (
-                        <div className={`${color.bestBg} rounded-xl py-1.5 px-3 text-center`}>
-                            {label && <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{label}</div>}
-                            <BestScoreDisplay score={score} drill={drill} qCount={qCount} size="sm" />
-                        </div>
-                    );
-                };
-
-                const color6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  sub: 'text-indigo-500',  btn1: 'bg-indigo-500 hover:bg-indigo-600',  btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-indigo-100' };
-                const color7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', sub: 'text-emerald-500', btn1: 'bg-emerald-500 hover:bg-emerald-600', btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-emerald-100' };
-                const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-violet-100' };
 
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4">
@@ -937,48 +957,43 @@
                             <p className="text-slate-400 text-xs mb-2 text-center">萬子・筒子・索子 ランダム出題</p>
 
                             <div className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <DrillCard d="6" title="6枚形" color={color6}
-                                        buttons={<>
-                                            <div className="flex gap-2 mb-3">
-                                                <button onClick={() => startNewGame('timeattack', '6', 13)}
-                                                    className={`flex-1 py-5 ${color6.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
-                                                    13問
-                                                </button>
-                                            </div>
-                                            <BestBadge score={bestScore6} drill="6" color={color6} />
-                                        </>}
-                                    />
-                                    <DrillCard d="7" title="7枚形" color={color7}
-                                        buttons={<>
-                                            <div className="flex gap-2 mb-3">
-                                                <button onClick={() => startNewGame('timeattack', '7', 19)}
-                                                    className={`flex-1 py-5 ${color7.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
-                                                    19問
-                                                </button>
-                                            </div>
-                                            <BestBadge score={bestScore7} drill="7" color={color7} />
-                                        </>}
-                                    />
+                                {/* 6枚形 */}
+                                <div className={`rounded-2xl border-2 ${color6.border} ${color6.bg} p-3`}>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => startNewGame('timeattack', '6', 13)}
+                                            className={`flex-1 py-5 ${color6.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                            6枚形　13問
+                                        </button>
+                                        <ScoreDetail stats={bestStats6} drill="6" qCount={13} />
+                                    </div>
                                 </div>
-                                <DrillCard d="10" title="10枚形" color={color10}
-                                    buttons={<>
-                                        <div className="flex gap-2 mb-3">
-                                            <button onClick={() => startNewGame('timeattack', '10', 20)}
-                                                className={`flex-1 py-5 ${color10.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
-                                                ランダム20問
-                                            </button>
-                                            <button onClick={() => startNewGame('timeattack', '10', 82)}
-                                                className={`flex-1 py-5 ${color10.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
-                                                全82問
-                                            </button>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <BestBadge score={bestScore10_20}  drill="10" qCount={20} color={color10} />
-                                            <BestBadge score={bestScore10_all} drill="10" qCount={82} color={color10} />
-                                        </div>
-                                    </>}
-                                />
+                                {/* 7枚形 */}
+                                <div className={`rounded-2xl border-2 ${color7.border} ${color7.bg} p-3`}>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => startNewGame('timeattack', '7', 19)}
+                                            className={`flex-1 py-5 ${color7.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                            7枚形　19問
+                                        </button>
+                                        <ScoreDetail stats={bestStats7} drill="7" qCount={19} />
+                                    </div>
+                                </div>
+                                {/* 10枚形 */}
+                                <div className={`rounded-2xl border-2 ${color10.border} ${color10.bg} p-3 space-y-2`}>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => startNewGame('timeattack', '10', 20)}
+                                            className={`flex-1 py-5 ${color10.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                            10枚形　ランダム20問
+                                        </button>
+                                        <ScoreDetail stats={bestStats10_20} drill="10" qCount={20} />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => startNewGame('timeattack', '10', 82)}
+                                            className={`flex-1 py-5 ${color10.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                            10枚形　全82問
+                                        </button>
+                                        <ScoreDetail stats={bestStats10_all} drill="10" qCount={82} />
+                                    </div>
+                                </div>
                             </div>
 
                             <hr className="border-slate-200 mt-3" />
