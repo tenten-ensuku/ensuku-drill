@@ -779,30 +779,43 @@
                 const unlocked10_20  = isRankSOrAbove(bestScore10_20, '10', 20);
                 const unlocked10_all = isRankSOrAbove(bestScore10_all, '10', 82);
 
-                const DkDrillCard = ({ title, buttons }) => (
-                    <div className="rounded-2xl border-2 border-gray-600 bg-gray-800 p-3">
-                        <div className="mb-2 font-black text-base text-gray-100">{title}</div>
-                        {buttons}
+                const uColor6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  bestBg: 'bg-white border border-indigo-100',  btn2: 'bg-orange-400 hover:bg-orange-500' };
+                const uColor7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', bestBg: 'bg-white border border-emerald-100', btn2: 'bg-orange-400 hover:bg-orange-500' };
+                const uColor10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  bestBg: 'bg-white border border-violet-100',  btn2: 'bg-orange-400 hover:bg-orange-500' };
+                const UCard = ({ title, color, children }) => (
+                    <div className={`rounded-2xl border-2 ${color.border} ${color.bg} p-3`}>
+                        <div className={`mb-2 font-black text-base ${color.title}`}>{title}</div>
+                        {children}
                     </div>
                 );
-                const DkBtn = ({ label, onClick, locked }) => (
+                const UBtn = ({ label, onClick, locked, color }) => (
                     <button
                         onClick={locked ? () => {
                             setUraLockMsg('解放条件Sを満たしていません');
                             setTimeout(() => setUraLockMsg(null), 2000);
                         } : onClick}
                         className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 relative overflow-hidden ${
-                            locked ? 'bg-gray-800 text-gray-600' : 'bg-gray-600 hover:bg-gray-500 text-white'
+                            locked ? 'bg-slate-200 text-slate-400' : `${color.btn2} text-white`
                         }`}
                     >
                         {locked && (
-                            <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-[1px] flex items-center justify-center text-lg">
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center text-lg">
                                 🔒
                             </div>
                         )}
                         {label}
                     </button>
                 );
+                const UBest = ({ score, drill, qCount, label, color }) => {
+                    if (score === -9999) return null;
+                    return (
+                        <div className={`${color.bestBg} rounded-xl py-2 px-3 text-center`}>
+                            {label && <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{label}</div>}
+                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">自己ベスト</div>
+                            <BestScoreDisplay score={score} drill={drill} qCount={qCount} size="sm" />
+                        </div>
+                    );
+                };
                 return (
                     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-5 border border-gray-700">
@@ -825,43 +838,29 @@
 
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
-                                    <DkDrillCard title="6枚形" buttons={<>
+                                    <UCard title="6枚形" color={uColor6}>
                                         <div className="flex gap-2 mb-2">
-                                            <DkBtn label="26問" locked={!unlocked6} onClick={() => startNewGame('ura', '6', 26)} />
+                                            <UBtn label="26問" locked={!unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 26)} />
                                         </div>
-                                        {bestScore6 !== -9999 && <div className="bg-gray-700 border border-gray-600 rounded-xl py-1.5 px-2 text-center">
-                                            <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">自己ベスト</div>
-                                            <BestScoreDisplay score={bestScore6} drill="6" size="sm" />
-                                        </div>}
-                                    </>} />
-                                    <DkDrillCard title="7枚形" buttons={<>
+                                        <UBest score={bestScore6} drill="6" color={uColor6} />
+                                    </UCard>
+                                    <UCard title="7枚形" color={uColor7}>
                                         <div className="flex gap-2 mb-2">
-                                            <DkBtn label="19問" locked={!unlocked7} onClick={() => startNewGame('ura', '7', 19)} />
+                                            <UBtn label="19問" locked={!unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
                                         </div>
-                                        {bestScore7 !== -9999 && <div className="bg-gray-700 border border-gray-600 rounded-xl py-1.5 px-2 text-center">
-                                            <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">自己ベスト</div>
-                                            <BestScoreDisplay score={bestScore7} drill="7" size="sm" />
-                                        </div>}
-                                    </>} />
+                                        <UBest score={bestScore7} drill="7" color={uColor7} />
+                                    </UCard>
                                 </div>
-                                <DkDrillCard title="10枚形" buttons={<>
+                                <UCard title="10枚形" color={uColor10}>
                                     <div className="flex gap-2 mb-2">
-                                        <DkBtn label="ランダム20問" locked={!unlocked10_20} onClick={() => startNewGame('ura', '10', 20)} />
-                                        <DkBtn label="全82問" locked={!unlocked10_all} onClick={() => startNewGame('ura', '10', 82)} />
+                                        <UBtn label="ランダム20問" locked={!unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
+                                        <UBtn label="全82問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 82)} />
                                     </div>
-                                    {(bestScore10_20 !== -9999 || bestScore10_all !== -9999) && (
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {bestScore10_20 !== -9999 && <div className="bg-gray-700 border border-gray-600 rounded-xl py-1.5 px-2 text-center">
-                                                <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">20問</div>
-                                                <BestScoreDisplay score={bestScore10_20} drill="10" qCount={20} size="sm" />
-                                            </div>}
-                                            {bestScore10_all !== -9999 && <div className="bg-gray-700 border border-gray-600 rounded-xl py-1.5 px-2 text-center">
-                                                <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">全82問</div>
-                                                <BestScoreDisplay score={bestScore10_all} drill="10" qCount={82} size="sm" />
-                                            </div>}
-                                        </div>
-                                    )}
-                                </>} />
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <UBest score={bestScore10_20}  drill="10" qCount={20}  label="20問"  color={uColor10} />
+                                        <UBest score={bestScore10_all} drill="10" qCount={82}  label="全82問" color={uColor10} />
+                                    </div>
+                                </UCard>
                             </div>
 
                             <div className="flex gap-2 mt-3">
