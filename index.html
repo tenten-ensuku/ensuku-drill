@@ -1019,32 +1019,6 @@
                 );
             }
 
-            // ========== 裏モード：クリア画面 ==========
-            if (isFinished && mode === 'ura' && !uraGameOver) {
-                return (
-                    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-                        <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-8 text-center border border-gray-700">
-                            <div className="text-7xl mb-4">🌑</div>
-                            <h2 className="text-4xl font-black text-white mb-1 tracking-widest">CLEAR</h2>
-                            <p className="text-gray-400 text-sm mb-6">全問ノーミス達成！</p>
-                            <div className="grid grid-cols-2 gap-3 mb-6">
-                                <div className="bg-gray-800 border border-gray-600 rounded-2xl p-3">
-                                    <div className="text-green-400 font-black text-3xl">{correctCount}</div>
-                                    <div className="text-gray-400 font-bold text-xs mt-1">全問正解</div>
-                                </div>
-                                <div className="bg-gray-800 border border-gray-600 rounded-2xl p-3">
-                                    <div className="text-white font-black text-3xl">{elapsedTime}s</div>
-                                    <div className="text-gray-400 font-bold text-xs mt-1">クリアタイム</div>
-                                </div>
-                            </div>
-                            <button onClick={resetToHome}
-                                className="w-full py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-2xl font-black text-lg transition-all active:scale-95">
-                                裏モードホームへ
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
 
             // ========== 復習モード結果画面 ==========
             if (isFinished && mode === 'review') {
@@ -1204,7 +1178,7 @@
             const currentProblem = problemStack[currentIdx];
             const tileCount      = currentProblem ? currentProblem.tiles.length : 6;
             const scaleClass     = tileCount >= 10 ? '' : 'scale-110 sm:scale-125';
-            const dark = mode === 'ura';
+            const dark = false;
 
             return (
                 <div className={`max-w-md mx-auto min-h-screen flex flex-col relative ${dark ? 'bg-gray-950' : 'bg-slate-50'}`}>
