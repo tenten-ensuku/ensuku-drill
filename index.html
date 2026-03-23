@@ -806,7 +806,14 @@
                 return (
                     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-5 border border-gray-700">
-                            <h1 className="text-2xl font-black text-white mb-1 text-center">🌑 裏もーど</h1>
+                            <div className="flex items-center justify-between mb-1">
+                                <div className="w-24"></div>
+                                <h1 className="text-2xl font-black text-white text-center">🌑 裏もーど</h1>
+                                <button onClick={() => setUraMode(false)}
+                                    className="text-xs font-bold text-gray-300 bg-gray-700 hover:bg-gray-600 border border-gray-500 px-3 py-1.5 rounded-lg transition-colors active:scale-95 whitespace-nowrap">
+                                    表モード
+                                </button>
+                            </div>
                             <p className="text-gray-400 text-xs mb-1 text-center">間違えた瞬間ゲームオーバー・全正解で即自動進行</p>
                             <p className="text-gray-600 text-[10px] mb-3 text-center">各モードでS以上を獲得すると解放</p>
 
@@ -849,10 +856,6 @@
                                     <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-white text-yellow-700' : 'bg-gray-700 text-gray-600'}`}>{favorites.length}</span>
                                 </button>
                             </div>
-                            <button onClick={() => setUraMode(false)}
-                                className="w-full mt-3 py-2.5 rounded-xl font-bold text-sm text-gray-500 hover:text-gray-300 transition-colors">
-                                ← 通常モードに戻る
-                            </button>
                         </div>
                     </div>
                 );
