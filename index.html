@@ -483,7 +483,7 @@
                     const reversed = Math.random() < 0.5;
                     const tilesM   = reversed ? p.tiles.map(mirror)   : p.tiles;
                     const answersM = reversed ? p.answers.map(mirror) : p.answers;
-                    if (d === '6') {
+                    if (d === '6' || d === '7') {
                         const validShifts = getValidShifts(tilesM);
                         const k = validShifts[Math.floor(Math.random() * validShifts.length)];
                         return {
