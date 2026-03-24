@@ -12,14 +12,17 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         html, body, #root {
             height: 100%;
+            width: 100%;
             overflow: hidden;
             overscroll-behavior: none;
+            position: fixed;
         }
         body { font-family: 'Inter', sans-serif; }
         .scroll-screen {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
+            touch-action: pan-y;
         }
 
         @keyframes resultPop {
@@ -361,17 +364,18 @@
                 return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの7枚形のようだ。' };
             }
             // 6枚形（13問・最大130pt）
-            if (score >= 100) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
-            if (score >= 85)  return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
-            if (score >= 70)  return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
-            if (score >= 55)  return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんの昼間の麻雀だ' };
-            if (score >= 40)  return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
-            if (score >= 25)  return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
-            if (score >= 10)  return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
-            if (score >= 0)   return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
-            if (score >= -40) return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
-            if (score >= -80) return { rank: 'D',  color: 'text-black',    comment: '6枚形が仲間になりたそうにコチラを見ている' };
-            return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの6枚形のようだ。' };
+            if (score >= 110) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
+            if (score >= 105) return { rank: 'SS',  color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+            if (score >= 100) return { rank: 'S',   color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+            if (score >= 95)  return { rank: 'A+',  color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+            if (score >= 90)  return { rank: 'A',   color: 'text-red-600', comment: '強えっつっても兄さんの昼間の麻雀だ' };
+            if (score >= 85)  return { rank: 'A-',  color: 'text-red-600', comment: '行くぜ、坊や！！' };
+            if (score >= 80)  return { rank: 'B+',  color: 'text-green-600', comment: '倍プッシュだ…！' };
+            if (score >= 75)  return { rank: 'B',   color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+            if (score >= 70)  return { rank: 'B-',  color: 'text-green-600', comment: '熱い三流なら上等よ' };
+            if (score >= 50)  return { rank: 'C',   color: 'text-blue-600', comment: 'まだまだだね' };
+            if (score >= 25)  return { rank: 'D',   color: 'text-black',    comment: '6枚形が仲間になりたそうにコチラを見ている' };
+            return                    { rank: 'E',   color: 'text-slate-400', comment: 'へんじが無い。ただの6枚形のようだ。' };
         };
 
         // --- 牌画像コンポーネント ---
@@ -505,7 +509,7 @@
                 return 'mahjong6_best';
             };
 
-            const URA_RANK_ORDER = ['E','D','C','B-','B','B+','A-','A','A+','S','SS'];
+            const URA_RANK_ORDER = ['E','D','C','B-','B','B+','A-','A','A+','S','SS','SSS'];
             const isRankSOrAbove = (score, d, qc) => {
                 if (score === -9999) return false;
                 const { rank } = getRankInfo(score, d, qc);
@@ -1290,13 +1294,14 @@
                         </div>
 
                         {/* ○✕ インジケーター（1ボタンの上） */}
-                        <div className="w-full max-w-[360px] h-12 flex items-center mb-1">
+                        <div className="w-full max-w-[360px] h-24 flex items-center justify-center mb-1">
                             {lastResult && (
                                 <span style={{
-                                    fontSize: '44px',
+                                    fontSize: '88px',
                                     fontWeight: 900,
                                     lineHeight: 1,
                                     color: lastResult === 'correct' ? '#ef4444' : '#3b82f6',
+                                    animation: 'resultPop 0.3s ease-out forwards',
                                 }}>
                                     {lastResult === 'correct' ? '○' : '✕'}
                                 </span>
