@@ -57,6 +57,40 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
+
+        /* === オレンジボタン（グラデーション＋立体感）=== */
+        .btn-orange {
+            background: linear-gradient(to bottom, #fb923c, #ea580c);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2), 0 4px 12px rgba(234,88,12,0.4);
+            color: #ffffff;
+            letter-spacing: 0.03em;
+            transition: all 0.15s;
+        }
+        .btn-orange:hover {
+            background: linear-gradient(to bottom, #f97316, #c2410c);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.25), 0 6px 16px rgba(234,88,12,0.5);
+        }
+        .btn-orange:active { transform: scale(0.95); background: linear-gradient(to bottom, #ea580c, #c2410c); }
+
+        /* === 復習ボタン（メタリックローズ）=== */
+        .btn-review {
+            background: linear-gradient(to bottom, #f43f5e, #be123c);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(190,18,60,0.4);
+            color: #ffffff;
+            transition: all 0.15s;
+        }
+        .btn-review:hover { background: linear-gradient(to bottom, #fb7185, #e11d48); }
+        .btn-review:active { transform: scale(0.95); }
+
+        /* === お気に入りボタン（メタリックゴールド）=== */
+        .btn-favorite {
+            background: linear-gradient(to bottom, #fbbf24, #b45309);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 12px rgba(180,83,9,0.4);
+            color: #713f12;
+            transition: all 0.15s;
+        }
+        .btn-favorite:hover { background: linear-gradient(to bottom, #fcd34d, #d97706); }
+        .btn-favorite:active { transform: scale(0.95); }
     </style>
 </head>
 <body class="bg-slate-50">
@@ -790,9 +824,9 @@
                 const unlocked10_20  = isRankSOrAbove(bestScore10_20, '10', 20);
                 const unlocked10_all = isRankSOrAbove(bestScore10_all, '10', 82);
 
-                const uColor6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  bestBg: 'bg-white border border-indigo-100',  btn2: 'bg-orange-400 hover:bg-orange-500' };
-                const uColor7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', bestBg: 'bg-white border border-emerald-100', btn2: 'bg-orange-400 hover:bg-orange-500' };
-                const uColor10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  bestBg: 'bg-white border border-violet-100',  btn2: 'bg-orange-400 hover:bg-orange-500' };
+                const uColor6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  bestBg: 'bg-white border border-indigo-100',  btn2: 'btn-orange' };
+                const uColor7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', bestBg: 'bg-white border border-emerald-100', btn2: 'btn-orange' };
+                const uColor10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  bestBg: 'bg-white border border-violet-100',  btn2: 'btn-orange' };
                 const UCard = ({ title, color, children }) => (
                     <div className={`rounded-2xl border-2 ${color.border} ${color.bg} p-3`}>
                         <div className={`mb-2 font-black text-base text-center ${color.title}`}>{title}</div>
@@ -806,7 +840,7 @@
                             setTimeout(() => setUraLockMsg(null), 2000);
                         } : onClick}
                         className={`flex-1 py-5 rounded-xl font-bold text-sm transition-all active:scale-95 relative overflow-hidden ${
-                            locked ? 'bg-slate-200 text-slate-400' : `${color.btn2} text-white`
+                            locked ? 'bg-slate-200 text-slate-400' : `${color.btn2}`
                         }`}
                     >
                         {locked && (
@@ -876,14 +910,14 @@
                             <hr className="border-gray-600 mt-3" />
                             <div className="flex gap-2 pt-3">
                                 <button onClick={reviewBucket.length > 0 ? startReviewGame : undefined}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${reviewBucket.length > 0 ? 'bg-gray-700 hover:bg-gray-600 text-white shadow active:scale-95' : 'bg-gray-800 text-gray-600 cursor-default'}`}>
+                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 ${reviewBucket.length > 0 ? 'btn-review' : 'bg-gray-800 text-gray-600 cursor-default'}`}>
                                     🔄 復習
-                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white text-gray-800' : 'bg-gray-700 text-gray-600'}`}>{reviewBucket.length}</span>
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white/20 text-white' : 'bg-gray-700 text-gray-600'}`}>{reviewBucket.length}</span>
                                 </button>
                                 <button onClick={favorites.length > 0 ? () => setShowFavorites(true) : undefined}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${favorites.length > 0 ? 'bg-yellow-600 hover:bg-yellow-500 text-white shadow active:scale-95' : 'bg-gray-800 text-gray-600 cursor-default'}`}>
+                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 ${favorites.length > 0 ? 'btn-favorite' : 'bg-gray-800 text-gray-600 cursor-default'}`}>
                                     ⭐ お気に入り
-                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-white text-yellow-700' : 'bg-gray-700 text-gray-600'}`}>{favorites.length}</span>
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-white/20 text-yellow-900' : 'bg-gray-700 text-gray-600'}`}>{favorites.length}</span>
                                 </button>
                             </div>
                         </div>
@@ -923,9 +957,9 @@
                     );
                 };
 
-                const color6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  sub: 'text-indigo-500',  btn1: 'bg-indigo-500 hover:bg-indigo-600',  btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-indigo-100' };
-                const color7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', sub: 'text-emerald-500', btn1: 'bg-emerald-500 hover:bg-emerald-600', btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-emerald-100' };
-                const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'bg-orange-400 hover:bg-orange-500', bestBg: 'bg-white border border-violet-100' };
+                const color6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  sub: 'text-indigo-500',  btn1: 'bg-indigo-500 hover:bg-indigo-600',  btn2: 'btn-orange', bestBg: 'bg-white border border-indigo-100' };
+                const color7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', sub: 'text-emerald-500', btn1: 'bg-emerald-500 hover:bg-emerald-600', btn2: 'btn-orange', bestBg: 'bg-white border border-emerald-100' };
+                const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'btn-orange', bestBg: 'bg-white border border-violet-100' };
 
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4">
@@ -946,7 +980,7 @@
                                         buttons={<>
                                             <div className="flex gap-2 mb-3">
                                                 <button onClick={() => startNewGame('timeattack', '6', 13)}
-                                                    className={`flex-1 py-5 ${color6.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                                    className={`flex-1 py-5 ${color6.btn2} rounded-xl font-bold text-sm`}>
                                                     13問
                                                 </button>
                                             </div>
@@ -957,7 +991,7 @@
                                         buttons={<>
                                             <div className="flex gap-2 mb-3">
                                                 <button onClick={() => startNewGame('timeattack', '7', 19)}
-                                                    className={`flex-1 py-5 ${color7.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                                    className={`flex-1 py-5 ${color7.btn2} rounded-xl font-bold text-sm`}>
                                                     19問
                                                 </button>
                                             </div>
@@ -969,11 +1003,11 @@
                                     buttons={<>
                                         <div className="flex gap-2 mb-3">
                                             <button onClick={() => startNewGame('timeattack', '10', 20)}
-                                                className={`flex-1 py-5 ${color10.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                                className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
                                                 ランダム20問
                                             </button>
                                             <button onClick={() => startNewGame('timeattack', '10', 82)}
-                                                className={`flex-1 py-5 ${color10.btn2} text-white rounded-xl font-bold text-sm transition-all active:scale-95`}>
+                                                className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
                                                 全82問
                                             </button>
                                         </div>
@@ -988,14 +1022,14 @@
                             <hr className="border-slate-200 mt-3" />
                             <div className="flex gap-2 pt-3">
                                 <button onClick={reviewBucket.length > 0 ? startReviewGame : undefined}
-                                    className={`flex-1 py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${reviewBucket.length > 0 ? 'bg-rose-500 hover:bg-rose-600 text-white shadow active:scale-95' : 'bg-rose-100 text-rose-300 cursor-default'}`}>
+                                    className={`flex-1 py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-1 ${reviewBucket.length > 0 ? 'btn-review' : 'bg-rose-100 text-rose-300 cursor-default'}`}>
                                     🔄 復習
-                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white text-rose-500' : 'bg-rose-200 text-rose-300'}`}>{reviewBucket.length}</span>
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white/20 text-white' : 'bg-rose-200 text-rose-300'}`}>{reviewBucket.length}</span>
                                 </button>
                                 <button onClick={favorites.length > 0 ? () => setShowFavorites(true) : undefined}
-                                    className={`flex-1 py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-1 transition-all ${favorites.length > 0 ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900 shadow active:scale-95' : 'bg-yellow-100 text-yellow-300 cursor-default'}`}>
+                                    className={`flex-1 py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-1 ${favorites.length > 0 ? 'btn-favorite' : 'bg-yellow-100 text-yellow-300 cursor-default'}`}>
                                     ⭐ お気に入り
-                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-yellow-900 text-yellow-100' : 'bg-yellow-200 text-yellow-300'}`}>{favorites.length}</span>
+                                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${favorites.length > 0 ? 'bg-white/20 text-yellow-900' : 'bg-yellow-200 text-yellow-300'}`}>{favorites.length}</span>
                                 </button>
                             </div>
                         </div>
