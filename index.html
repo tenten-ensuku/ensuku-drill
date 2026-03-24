@@ -1168,8 +1168,12 @@
                             </div>
 
                             <button onClick={resetToHome}
-                                className="w-full py-4 bg-slate-800 text-white rounded-xl font-bold shadow-lg hover:bg-slate-700 transition-colors">
-                                タイトルへ戻る
+                                className="w-full py-4 bg-slate-800 text-white rounded-xl font-bold shadow-lg hover:bg-slate-700 transition-colors mb-3">
+                                メニューに戻る
+                            </button>
+                            <button onClick={() => startNewGame(mode, drill, questionCount)}
+                                className="w-full py-4 bg-orange-500 text-white rounded-xl font-bold shadow-lg hover:bg-orange-400 transition-colors">
+                                もう一度
                             </button>
 
                             {wrongLog.length > 0 && (
