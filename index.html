@@ -10,7 +10,17 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        html, body, #root {
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
         body { font-family: 'Inter', sans-serif; }
+        .scroll-screen {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
 
         @keyframes resultPop {
             0%   { transform: scale(0.6); opacity: 0; }
@@ -770,7 +780,7 @@
             // ========== お気に入り一覧画面 ==========
             if (!drill && showFavorites) {
                 return (
-                    <div className="min-h-screen bg-slate-50 p-4">
+                    <div className="h-screen scroll-screen bg-slate-50 p-4">
                         <div className="max-w-md mx-auto">
                             <div className="flex items-center justify-between mb-4 pt-4">
                                 <h2 className="text-xl font-black text-slate-800">⭐ お気に入り一覧</h2>
@@ -861,7 +871,7 @@
                     );
                 };
                 return (
-                    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+                    <div className="h-screen overflow-hidden bg-gray-950 flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-5 border border-gray-700">
                             <div className="flex items-center justify-between mb-1">
                                 <div className="w-24"></div>
@@ -962,7 +972,7 @@
                 const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'btn-orange', bestBg: 'bg-white border border-violet-100' };
 
                 return (
-                    <div className="min-h-screen flex items-center justify-center p-4">
+                    <div className="h-screen overflow-hidden flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-5 border border-slate-100">
                             <div className="flex items-center justify-between mb-1">
                                 <div className="w-16"></div>
@@ -1040,7 +1050,7 @@
             // ========== 裏モード：ゲームオーバー画面 ==========
             if (isFinished && mode === 'ura' && uraGameOver) {
                 return (
-                    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+                    <div className="h-screen overflow-hidden bg-gray-950 flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-8 text-center border border-gray-700">
                             <div className="text-7xl mb-4">💀</div>
                             <h2 className="text-4xl font-black text-white mb-1 tracking-widest">GAME OVER</h2>
@@ -1068,7 +1078,7 @@
             // ========== 復習モード結果画面 ==========
             if (isFinished && mode === 'review') {
                 return (
-                    <div className="min-h-screen flex items-center justify-center p-4">
+                    <div className="h-screen overflow-hidden flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-8 text-center">
                             <div className="text-5xl mb-4">🔄</div>
                             <h2 className="text-2xl font-black text-slate-800 mb-2">復習完了！</h2>
@@ -1102,7 +1112,8 @@
                 const drillLabel = drill === '7' ? '7枚形' : drill === '10' ? `10枚形（${questionCount}問）` : '6枚形';
 
                 return (
-                    <div className="min-h-screen flex items-center justify-center p-4">
+                    <div className="h-screen scroll-screen p-4">
+                        <div className="min-h-full flex items-center justify-center">
                         <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-8 text-center relative overflow-hidden">
                             {isNewRecord && (
                                 <div className="absolute top-4 right-[-35px] bg-yellow-400 text-yellow-900 text-[10px] font-black py-1 px-10 rotate-45 shadow-sm record-badge">
@@ -1215,6 +1226,7 @@
                                 </div>
                             )}
                         </div>
+                        </div>
                     </div>
                 );
             }
@@ -1226,7 +1238,7 @@
             const dark = false;
 
             return (
-                <div className={`max-w-md mx-auto min-h-screen flex flex-col relative ${dark ? 'bg-gray-950' : 'bg-slate-50'}`}>
+                <div className={`max-w-md mx-auto h-screen overflow-hidden flex flex-col relative ${dark ? 'bg-gray-950' : 'bg-slate-50'}`}>
                     <div className={`px-4 py-3 flex justify-between items-center shadow-sm sticky top-0 z-50 ${dark ? 'bg-gray-900 border-b border-gray-700' : 'bg-white border-b border-slate-100'}`}>
                         <div className={`font-bold text-sm w-16 ${dark ? 'text-gray-400' : 'text-slate-400'}`}>{currentIdx + 1} / {problemStack.length}</div>
 
@@ -1247,7 +1259,7 @@
                         <div className="font-mono font-black text-orange-500 text-xl w-16 text-right">{elapsedTime}s</div>
                     </div>
 
-                    <div className="flex-1 p-4 flex flex-col items-center">
+                    <div className="flex-1 p-4 flex flex-col items-center overflow-hidden">
                         {/* 牌表示（2スロット切り替えで爆速化） */}
                         <div className="mt-8 mb-10 relative" style={{ minHeight: '120px' }}>
                             {[0, 1].map((slot) => {
