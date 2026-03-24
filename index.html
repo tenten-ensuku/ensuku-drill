@@ -1294,14 +1294,13 @@
                         </div>
 
                         {/* ○✕ インジケーター（1ボタンの上） */}
-                        <div className="w-full max-w-[360px] h-24 flex items-center justify-center mb-1">
+                        <div className="w-full max-w-[360px] h-12 flex items-center mb-1">
                             {lastResult && (
                                 <span style={{
-                                    fontSize: '88px',
+                                    fontSize: '44px',
                                     fontWeight: 900,
                                     lineHeight: 1,
                                     color: lastResult === 'correct' ? '#ef4444' : '#3b82f6',
-                                    animation: 'resultPop 0.3s ease-out forwards',
                                 }}>
                                     {lastResult === 'correct' ? '○' : '✕'}
                                 </span>
