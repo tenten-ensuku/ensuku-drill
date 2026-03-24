@@ -620,7 +620,7 @@
                         pendingStatsRef.current = { correct: nextC, incorrect: nextI };
                         setLastResult('correct');
                         setTimeout(() => nextQuestion(nextC, nextI), 0);
-                        setTimeout(() => setLastResult(null), 500);
+                        setTimeout(() => setLastResult(null), 1000);
                     }
                     return;
                 }
@@ -673,7 +673,7 @@
                 if (mode === 'timeattack') {
                     setLastResult(isCorrect ? 'correct' : 'incorrect');
                     setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), 0);
-                    setTimeout(() => setLastResult(null), 500);
+                    setTimeout(() => setLastResult(null), 1000);
                 } else if (mode === 'review' && isCorrect) {
                     setTimeout(() => nextQuestion(nextCorrect, nextIncorrect), 200);
                 }
@@ -1289,11 +1289,11 @@
                             })}
                         </div>
 
-                        {/* ○✕ 小インジケーター（1ボタンの上） */}
-                        <div className="w-full max-w-[360px] h-7 flex items-center mb-1">
+                        {/* ○✕ インジケーター（1ボタンの上） */}
+                        <div className="w-full max-w-[360px] h-12 flex items-center mb-1">
                             {lastResult && (
                                 <span style={{
-                                    fontSize: '22px',
+                                    fontSize: '44px',
                                     fontWeight: 900,
                                     lineHeight: 1,
                                     color: lastResult === 'correct' ? '#ef4444' : '#3b82f6',
