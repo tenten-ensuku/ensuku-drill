@@ -457,6 +457,10 @@
             const [bestScore7, setBestScore7]       = useState(-9999);
             const [bestScore10_20, setBestScore10_20] = useState(-9999);
             const [bestScore10_all, setBestScore10_all] = useState(-9999);
+            const [bestElapsed6, setBestElapsed6]       = useState(-1);
+            const [bestElapsed7, setBestElapsed7]       = useState(-1);
+            const [bestElapsed10_20, setBestElapsed10_20] = useState(-1);
+            const [bestElapsed10_all, setBestElapsed10_all] = useState(-1);
             const [isNewRecord, setIsNewRecord]     = useState(false);
             const [startTime, setStartTime]         = useState(null);
             const [elapsedTime, setElapsedTime]     = useState(0);
@@ -498,14 +502,18 @@
                     if (!v) return -9999;
                     try { const p = JSON.parse(v); return typeof p === 'number' ? p : (p?.score ?? -9999); } catch { return -9999; }
                 };
+                const parseElapsed = (v) => {
+                    if (!v) return -1;
+                    try { const p = JSON.parse(v); return (typeof p === 'object' && p?.elapsed != null) ? p.elapsed : -1; } catch { return -1; }
+                };
                 const s6  = localStorage.getItem('mahjong6_best');
                 const s7  = localStorage.getItem('mahjong7_best');
                 const s10_20  = localStorage.getItem('mahjong10_best_20');
                 const s10_all = localStorage.getItem('mahjong10_best_82');
-                if (s6  !== null) setBestScore6(parseScore(s6));
-                if (s7  !== null) setBestScore7(parseScore(s7));
-                if (s10_20  !== null) setBestScore10_20(parseScore(s10_20));
-                if (s10_all !== null) setBestScore10_all(parseScore(s10_all));
+                if (s6  !== null) { setBestScore6(parseScore(s6)); setBestElapsed6(parseElapsed(s6)); }
+                if (s7  !== null) { setBestScore7(parseScore(s7)); setBestElapsed7(parseElapsed(s7)); }
+                if (s10_20  !== null) { setBestScore10_20(parseScore(s10_20)); setBestElapsed10_20(parseElapsed(s10_20)); }
+                if (s10_all !== null) { setBestScore10_all(parseScore(s10_all)); setBestElapsed10_all(parseElapsed(s10_all)); }
             }, []);
 
             const getBestScore = (d, qc) => {
@@ -737,11 +745,11 @@
                 const currentBest = Math.max(getBestScore(drill, questionCount), savedBest);
 
                 if (score > currentBest) {
-                    if (drill === '7')              setBestScore7(score);
-                    else if (drill === '10' && questionCount === 20)  setBestScore10_20(score);
-                    else if (drill === '10')         setBestScore10_all(score);
-                    else                             setBestScore6(score);
-                    localStorage.setItem(key, score.toString());
+                    if (drill === '7')              { setBestScore7(score);        setBestElapsed7(elapsed); }
+                    else if (drill === '10' && questionCount === 20)  { setBestScore10_20(score);  setBestElapsed10_20(elapsed); }
+                    else if (drill === '10')         { setBestScore10_all(score);   setBestElapsed10_all(elapsed); }
+                    else                             { setBestScore6(score);        setBestElapsed6(elapsed); }
+                    localStorage.setItem(key, JSON.stringify({ score, elapsed }));
                     setIsNewRecord(true);
                 }
                 setIsFinished(true);
@@ -989,12 +997,18 @@
                     </div>
                 );
 
-                const BestBadge = ({ score, drill, qCount, label, color }) => {
+                const BestBadge = ({ score, drill, qCount, label, color, elapsed }) => {
                     if (score === -9999) return null;
+                    const totalQ = qCount || (drill === '6' ? 13 : drill === '7' ? 19 : null);
                     return (
                         <div className={`${color.bestBg} rounded-xl py-1.5 px-3 text-center`}>
                             {label && <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{label}</div>}
                             <BestScoreDisplay score={score} drill={drill} qCount={qCount} size="sm" />
+                            {elapsed >= 0 && totalQ && (
+                                <div className="text-[10px] text-slate-400 font-medium mt-0.5">
+                                    {(elapsed / totalQ).toFixed(1)}秒/問
+                                </div>
+                            )}
                         </div>
                     );
                 };
@@ -1026,7 +1040,7 @@
                                                     13問
                                                 </button>
                                             </div>
-                                            <BestBadge score={bestScore6} drill="6" color={color6} />
+                                            <BestBadge score={bestScore6} drill="6" color={color6} elapsed={bestElapsed6} />
                                         </>}
                                     />
                                     <DrillCard d="7" title="7枚形" color={color7}
@@ -1037,7 +1051,7 @@
                                                     19問
                                                 </button>
                                             </div>
-                                            <BestBadge score={bestScore7} drill="7" color={color7} />
+                                            <BestBadge score={bestScore7} drill="7" color={color7} elapsed={bestElapsed7} />
                                         </>}
                                     />
                                 </div>
@@ -1054,8 +1068,8 @@
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <BestBadge score={bestScore10_20}  drill="10" qCount={20} color={color10} />
-                                            <BestBadge score={bestScore10_all} drill="10" qCount={82} color={color10} />
+                                            <BestBadge score={bestScore10_20}  drill="10" qCount={20} color={color10} elapsed={bestElapsed10_20} />
+                                            <BestBadge score={bestScore10_all} drill="10" qCount={82} color={color10} elapsed={bestElapsed10_all} />
                                         </div>
                                     </>}
                                 />
