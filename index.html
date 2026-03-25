@@ -593,6 +593,24 @@
                 return () => clearInterval(timerRef.current);
             }, [startTime, isFinished]);
 
+            // キーボード入力（テンキー対応）
+            useEffect(() => {
+                if (mode !== 'timeattack' || isFinished || !drill) return;
+                const onKey = (e) => {
+                    // 1〜9キー（通常・テンキー両対応）
+                    const num = (e.code && /^Numpad[1-9]$/.test(e.code))
+                        ? parseInt(e.code.slice(-1), 10)
+                        : (/^[1-9]$/.test(e.key) ? parseInt(e.key, 10) : NaN);
+                    if (!isNaN(num)) { toggleAnswer(num); return; }
+                    // Enter / NumpadEnter → 確定
+                    if ((e.key === 'Enter' || e.code === 'NumpadEnter') && !isSubmitted) {
+                        handleSubmit();
+                    }
+                };
+                window.addEventListener('keydown', onKey);
+                return () => window.removeEventListener('keydown', onKey);
+            }, [mode, isFinished, drill, isSubmitted, selectedAnswers, currentIdx, problemStack]);
+
             const toggleAnswer = (num) => {
                 if (isSubmitted) return;
 
