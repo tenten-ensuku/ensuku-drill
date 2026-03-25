@@ -1163,7 +1163,8 @@
 
             // ========== 結果画面 ==========
             if (isFinished) {
-                const finalScore = (correctCount * 10) - (incorrectCount * 10) - elapsedTime;
+                const timeBonus  = Math.max(0, questionCount * 20 - Math.floor(elapsedTime / 10));
+                const finalScore = Math.max(0, correctCount * 10 - incorrectCount * 20 + timeBonus);
                 const rankInfo   = getRankInfo(finalScore, drill, questionCount);
                 const bs         = getBestScore(drill, questionCount);
                 const drillLabel = drill === '7' ? '7枚形' : drill === '10' ? `10枚形（${questionCount}問）` : '6枚形';
@@ -1199,11 +1200,11 @@
                                         <span className="text-slate-400 font-mono">x{correctCount}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm mb-1">
-                                        <span className="text-red-500 font-bold">ミス (-{incorrectCount * 10})</span>
+                                        <span className="text-red-500 font-bold">ミス (-{incorrectCount * 20})</span>
                                         <span className="text-slate-400 font-mono">x{incorrectCount}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-orange-500 font-bold">時間 (-{elapsedTime})</span>
+                                        <span className="text-blue-500 font-bold">タイムボーナス (+{timeBonus})</span>
                                         <span className="text-slate-400 font-mono">{elapsedTime}秒</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm mt-1">
