@@ -739,7 +739,7 @@
 
                 const elapsed   = startTime != null ? Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
                 setElapsedTime(elapsed); // 結果画面と保存値を同一に揃える
-                const timeBonus = Math.max(0, questionCount * 20 - Math.floor(elapsed / 10));
+                const timeBonus = Math.max(0, questionCount * 20 - elapsed);
                 const score     = Math.max(0, c * 10 - i * 20 + timeBonus);
 
                 const key         = getLsKey(drill, questionCount);
@@ -1164,7 +1164,7 @@
 
             // ========== 結果画面 ==========
             if (isFinished) {
-                const timeBonus  = Math.max(0, questionCount * 20 - Math.floor(elapsedTime / 10));
+                const timeBonus  = Math.max(0, questionCount * 20 - elapsedTime);
                 const finalScore = Math.max(0, correctCount * 10 - incorrectCount * 20 + timeBonus);
                 const rankInfo   = getRankInfo(finalScore, drill, questionCount);
                 const bs         = getBestScore(drill, questionCount);
