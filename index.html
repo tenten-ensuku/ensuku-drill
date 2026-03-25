@@ -365,17 +365,18 @@
                 }
             }
             if (drill === '7') {
-                if (score >= 415) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
-                if (score >= 405) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
-                if (score >= 395) return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
-                if (score >= 385) return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
-                if (score >= 375) return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
-                if (score >= 365) return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
-                if (score >= 355) return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
-                if (score >= 345) return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
-                if (score >= 315) return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
-                if (score >= 290) return { rank: 'D',  color: 'text-black',    comment: '7枚形が仲間になりたそうにコチラを見ている' };
-                return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの7枚形のようだ。' };
+                if (score >= 540) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
+                if (score >= 530) return { rank: 'SS',  color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+                if (score >= 520) return { rank: 'S',   color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+                if (score >= 510) return { rank: 'A+',  color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                if (score >= 500) return { rank: 'A',   color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
+                if (score >= 490) return { rank: 'A-',  color: 'text-red-600', comment: '行くぜ、坊や！！' };
+                if (score >= 480) return { rank: 'B+',  color: 'text-green-600', comment: '倍プッシュだ…！' };
+                if (score >= 470) return { rank: 'B',   color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+                if (score >= 460) return { rank: 'B-',  color: 'text-green-600', comment: '熱い三流なら上等よ' };
+                if (score >= 450) return { rank: 'C',   color: 'text-blue-600', comment: 'まだまだだね' };
+                if (score >= 440) return { rank: 'D',   color: 'text-black',    comment: '7枚形が仲間になりたそうにコチラを見ている' };
+                return                    { rank: 'E',   color: 'text-slate-400', comment: 'へんじが無い。ただの7枚形のようだ。' };
             }
             // 6枚形（13問）
             if (score >= 370) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
