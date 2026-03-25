@@ -172,6 +172,20 @@
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
                 osc.connect(gain); gain.connect(this.ctx.destination);
                 osc.start(now); osc.stop(now + 0.05);
+            },
+            playLevelUp() {
+                this.init();
+                const now = this.ctx.currentTime;
+                [1000, 1400].forEach((freq, i) => {
+                    const osc  = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.09);
+                    gain.gain.setValueAtTime(0.1, now + i * 0.09);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.09 + 0.08);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.09); osc.stop(now + i * 0.09 + 0.08);
+                });
             }
         };
 
@@ -753,6 +767,7 @@
                     else                             { setBestScore6(score);        setBestElapsed6(elapsed); }
                     localStorage.setItem(key, JSON.stringify({ score, elapsed }));
                     setIsNewRecord(true);
+                    SoundEffect.playLevelUp();
                 }
                 setIsFinished(true);
             };
