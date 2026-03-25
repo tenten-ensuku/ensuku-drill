@@ -901,12 +901,18 @@
                         {label}
                     </button>
                 );
-                const UBest = ({ score, drill, qCount, label, color }) => {
+                const UBest = ({ score, drill, qCount, label, color, elapsed }) => {
                     if (score === -9999) return null;
+                    const totalQ = qCount || (drill === '6' ? 13 : drill === '7' ? 19 : null);
                     return (
                         <div className={`${color.bestBg} rounded-xl py-1.5 px-3 text-center`}>
                             {label && <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{label}</div>}
                             <BestScoreDisplay score={score} drill={drill} qCount={qCount} size="sm" />
+                            {elapsed >= 0 && totalQ && (
+                                <div className="text-[10px] text-gray-500 font-medium mt-0.5">
+                                    {(elapsed / totalQ).toFixed(1)}秒/問
+                                </div>
+                            )}
                         </div>
                     );
                 };
@@ -936,13 +942,13 @@
                                         <div className="flex gap-2 mb-2">
                                             <UBtn label="13問" locked={!unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 13)} />
                                         </div>
-                                        <UBest score={bestScore6} drill="6" color={uColor6} />
+                                        <UBest score={bestScore6} drill="6" color={uColor6} elapsed={bestElapsed6} />
                                     </UCard>
                                     <UCard title="7枚形" color={uColor7}>
                                         <div className="flex gap-2 mb-2">
                                             <UBtn label="19問" locked={!unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
                                         </div>
-                                        <UBest score={bestScore7} drill="7" color={uColor7} />
+                                        <UBest score={bestScore7} drill="7" color={uColor7} elapsed={bestElapsed7} />
                                     </UCard>
                                 </div>
                                 <UCard title="10枚形" color={uColor10}>
@@ -951,8 +957,8 @@
                                         <UBtn label="全82問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 82)} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <UBest score={bestScore10_20}  drill="10" qCount={20}  color={uColor10} />
-                                        <UBest score={bestScore10_all} drill="10" qCount={82}  color={uColor10} />
+                                        <UBest score={bestScore10_20}  drill="10" qCount={20}  color={uColor10} elapsed={bestElapsed10_20} />
+                                        <UBest score={bestScore10_all} drill="10" qCount={82}  color={uColor10} elapsed={bestElapsed10_all} />
                                     </div>
                                 </UCard>
                             </div>
