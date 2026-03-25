@@ -738,6 +738,7 @@
                 if (mode === 'review') { setIsFinished(true); return; }
 
                 const elapsed   = startTime != null ? Math.floor((Date.now() - startTime) / 1000) : elapsedTime;
+                setElapsedTime(elapsed); // 結果画面と保存値を同一に揃える
                 const timeBonus = Math.max(0, questionCount * 20 - Math.floor(elapsed / 10));
                 const score     = Math.max(0, c * 10 - i * 20 + timeBonus);
 
