@@ -558,16 +558,13 @@
                     const reversed = Math.random() < 0.5;
                     const tilesM   = reversed ? p.tiles.map(mirror)   : p.tiles;
                     const answersM = reversed ? p.answers.map(mirror) : p.answers;
-                    if (d === '6' || d === '7') {
-                        const validShifts = getValidShifts(tilesM);
-                        const k = validShifts[Math.floor(Math.random() * validShifts.length)];
-                        return {
-                            ...p, suit,
-                            tiles:   tilesM.map(n => n + k),
-                            answers: answersM.map(n => n + k).filter(n => n >= 1 && n <= 9)
-                        };
-                    }
-                    return { ...p, suit, tiles: tilesM, answers: answersM };
+                    const validShifts = getValidShifts(tilesM);
+                    const k = validShifts[Math.floor(Math.random() * validShifts.length)];
+                    return {
+                        ...p, suit,
+                        tiles:   tilesM.map(n => n + k),
+                        answers: answersM.map(n => n + k).filter(n => n >= 1 && n <= 9)
+                    };
                 });
 
                 setProblemStack(stack);
