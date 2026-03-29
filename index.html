@@ -237,7 +237,7 @@
             1166678-169
         `);
 
-        // --- 10枚形 問題データ（82問）---
+        // --- 10枚形 問題データ（79問）---
         const ALL_PROBLEMS_10 = parseData(`
             2233445599-259
             2233334445-246
@@ -275,7 +275,6 @@
             5677778888-569
             2222344567-1347
             2224444666-35
-            1234567888-147369
             4566777788-36958
             3456677888-25678
             4455667788-4578
@@ -286,7 +285,6 @@
             2222344666-1345
             2223334445-23456
             2345666678-147258
-            1113456888-2367
             2224445566-34567
             2223444567-123458
             3456677778-258369
@@ -309,7 +307,6 @@
             2223444566-456
             3455578999-2569
             5666677778-4589
-            2223457999-678
             2223333444-1245
             2222334445-1346
             2223444556-3647
@@ -337,7 +334,7 @@
         // --- ランク定義 ---
         const getRankInfo = (score, drill, qCount) => {
             if (drill === '10') {
-                const isAll = qCount >= 82;
+                const isAll = qCount >= 79;
                 if (isAll) {
                     if (score >= 610) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
                     if (score >= 540) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
@@ -450,7 +447,7 @@
         function App() {
             const [drill, setDrill]     = useState(null); // null | '6' | '7' | '10'
             const [mode, setMode]       = useState(null); // null | 'practice' | 'timeattack'
-            const [questionCount, setQuestionCount] = useState(null); // null | 20 | 82
+            const [questionCount, setQuestionCount] = useState(null); // null | 20 | 79
             const [problemStack, setProblemStack]   = useState([]);
             const [currentIdx, setCurrentIdx]       = useState(0);
             const [selectedAnswers, setSelectedAnswers] = useState([]);
@@ -877,7 +874,7 @@
                 const unlocked6      = isRankSOrAbove(bestScore6, '6');
                 const unlocked7      = isRankSOrAbove(bestScore7, '7');
                 const unlocked10_20  = isRankSOrAbove(bestScore10_20, '10', 20);
-                const unlocked10_all = isRankSOrAbove(bestScore10_all, '10', 82);
+                const unlocked10_all = isRankSOrAbove(bestScore10_all, '10', 79);
 
                 const uColor6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  bestBg: 'bg-white border border-indigo-100',  btn2: 'btn-orange' };
                 const uColor7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', bestBg: 'bg-white border border-emerald-100', btn2: 'btn-orange' };
@@ -959,11 +956,11 @@
                                 <UCard title="10枚形" color={uColor10}>
                                     <div className="flex gap-2 mb-2">
                                         <UBtn label="ランダム20問" locked={!unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
-                                        <UBtn label="全82問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 82)} />
+                                        <UBtn label="全79問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 79)} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <UBest score={bestScore10_20}  drill="10" qCount={20}  color={uColor10} elapsed={bestElapsed10_20} />
-                                        <UBest score={bestScore10_all} drill="10" qCount={82}  color={uColor10} elapsed={bestElapsed10_all} />
+                                        <UBest score={bestScore10_all} drill="10" qCount={79}  color={uColor10} elapsed={bestElapsed10_all} />
                                     </div>
                                 </UCard>
                             </div>
@@ -1073,14 +1070,14 @@
                                                 className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
                                                 ランダム20問
                                             </button>
-                                            <button onClick={() => startNewGame('timeattack', '10', 82)}
+                                            <button onClick={() => startNewGame('timeattack', '10', 79)}
                                                 className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
-                                                全82問
+                                                全79問
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <BestBadge score={bestScore10_20}  drill="10" qCount={20} color={color10} elapsed={bestElapsed10_20} />
-                                            <BestBadge score={bestScore10_all} drill="10" qCount={82} color={color10} elapsed={bestElapsed10_all} />
+                                            <BestBadge score={bestScore10_all} drill="10" qCount={79} color={color10} elapsed={bestElapsed10_all} />
                                         </div>
                                     </>}
                                 />
