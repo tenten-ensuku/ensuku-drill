@@ -320,14 +320,17 @@
             2233334455-256
         `);
 
-        // --- シフト可能範囲計算（端牌が1か9になるまで、かつ-3〜+3）---
-        const getValidShifts = (tiles) => {
+        // --- シフト可能範囲計算（端牌・答えタイルが1か9を超えないかつ-3〜+3）---
+        const getValidShifts = (tiles, answers) => {
             const minTile = Math.min(...tiles);
             const maxTile = Math.max(...tiles);
-            const minK = Math.max(-3, 1 - minTile);
-            const maxK = Math.min(3, 9 - maxTile);
+            const minAns  = Math.min(...answers);
+            const maxAns  = Math.max(...answers);
+            const minK = Math.max(-3, 1 - minTile, 1 - minAns);
+            const maxK = Math.min( 3, 9 - maxTile, 9 - maxAns);
             const shifts = [];
             for (let k = minK; k <= maxK; k++) shifts.push(k);
+            if (shifts.length === 0) shifts.push(0);
             return shifts;
         };
 
@@ -555,7 +558,7 @@
                     const reversed = Math.random() < 0.5;
                     const tilesM   = reversed ? p.tiles.map(mirror)   : p.tiles;
                     const answersM = reversed ? p.answers.map(mirror) : p.answers;
-                    const validShifts = getValidShifts(tilesM);
+                    const validShifts = getValidShifts(tilesM, answersM);
                     const k = validShifts[Math.floor(Math.random() * validShifts.length)];
                     return {
                         ...p, suit,
