@@ -817,6 +817,13 @@
                 setFavorites(prev => prev.filter(f => f.id !== id));
             };
 
+            // iOS スクロールコンテナ内で click が握り潰される問題を回避するためのヘルパー
+            // onTouchEnd + preventDefault でスクロール判定前に処理を実行、onClick でデスクトップをカバー
+            const tap = (handler) => ({
+                onClick: handler,
+                onTouchEnd: (e) => { e.preventDefault(); handler(); }
+            });
+
             // ========== 復習一覧画面 ==========
             if (!drill && showReview) {
                 return (
@@ -834,7 +841,7 @@
                                 <p className="text-center text-slate-400 font-bold mt-16">復習リストは空です</p>
                             ) : (
                                 <>
-                                    <button onClick={startReviewGame}
+                                    <button {...tap(startReviewGame)}
                                         className="w-full py-4 btn-review text-white rounded-2xl font-black text-lg shadow mb-4 transition-all active:scale-95">
                                         まとめて練習する（{reviewBucket.length}問）
                                     </button>
@@ -864,11 +871,11 @@
                                                             </div>
                                                         </div>
                                                         <div className="flex gap-1">
-                                                            <button onClick={() => alreadyFaved ? null : addFavorite({ problem: rv })}
+                                                            <button {...tap(() => alreadyFaved ? null : addFavorite({ problem: rv }))}
                                                                 className={`text-xs px-2 py-1 rounded-lg font-bold transition-colors ${alreadyFaved ? 'bg-yellow-100 text-yellow-400 cursor-default' : 'bg-slate-100 hover:bg-yellow-100 hover:text-yellow-600 text-slate-400'}`}>
                                                                 {alreadyFaved ? '⭐済' : '⭐追加'}
                                                             </button>
-                                                            <button onClick={() => setReviewBucket(prev => prev.filter(r => r.id !== rv.id))}
+                                                            <button {...tap(() => setReviewBucket(prev => prev.filter(r => r.id !== rv.id)))}
                                                                 className="text-xs px-2 py-1 bg-slate-100 hover:bg-red-100 hover:text-red-500 text-slate-400 rounded-lg font-bold transition-colors">
                                                                 ✕ 削除
                                                             </button>
@@ -898,7 +905,7 @@
                                 </button>
                             </div>
 
-                            <button onClick={startFavoritesGame}
+                            <button {...tap(startFavoritesGame)}
                                 className="w-full py-4 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-2xl font-black text-lg shadow mb-4 transition-all active:scale-95">
                                 まとめて練習する（{favorites.length}問）
                             </button>
@@ -923,7 +930,7 @@
                                                     ))}
                                                 </div>
                                             </div>
-                                            <button onClick={() => removeFavorite(fav.id)}
+                                            <button {...tap(() => removeFavorite(fav.id))}
                                                 className="text-xs px-2 py-1 bg-slate-100 hover:bg-red-100 hover:text-red-500 text-slate-400 rounded-lg font-bold transition-colors">
                                                 ✕ 削除
                                             </button>
@@ -1328,7 +1335,7 @@
                                                                 ))}
                                                             </div>
                                                         </div>
-                                                        <button onClick={() => alreadyFaved ? null : addFavorite(entry)}
+                                                        <button {...tap(() => alreadyFaved ? null : addFavorite(entry))}
                                                             className={`text-xs px-2 py-1 rounded-lg font-bold transition-colors ${alreadyFaved ? 'bg-yellow-100 text-yellow-400 cursor-default' : 'bg-slate-100 hover:bg-yellow-100 hover:text-yellow-600 text-slate-400'}`}>
                                                             {alreadyFaved ? '⭐済' : '⭐追加'}
                                                         </button>
