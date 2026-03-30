@@ -861,7 +861,8 @@
                                                     <div className="overflow-x-auto mb-2">
                                                         <div className="problem-tile-group">
                                                             {rv.tiles.slice().sort((a, b) => a - b).map((n, j) => (
-                                                                <TileImage key={j} num={n} suit={rv.suit} tileCount={rv.tiles.length} />
+                                                                <TileImage key={j} num={n} suit={rv.suit} tileCount={rv.tiles.length}
+                                                                    style={rv.tiles.length >= 10 ? { height: '34px' } : undefined} />
                                                             ))}
                                                         </div>
                                                     </div>
@@ -926,7 +927,8 @@
                                         <div className="overflow-x-auto mb-2">
                                         <div className="problem-tile-group">
                                             {fav.tiles.slice().sort((a, b) => a - b).map((n, j) => (
-                                                <TileImage key={j} num={n} suit={fav.suit} tileCount={fav.tiles.length} />
+                                                <TileImage key={j} num={n} suit={fav.suit} tileCount={fav.tiles.length}
+                                                    style={fav.tiles.length >= 10 ? { height: '34px' } : undefined} />
                                             ))}
                                         </div>
                                         </div>
@@ -1330,7 +1332,8 @@
                                                     <div className="overflow-x-auto mb-2">
                                                     <div className="problem-tile-group">
                                                         {entry.problem.tiles.slice().sort((a, b) => a - b).map((n, j) => (
-                                                            <TileImage key={j} num={n} suit={entry.problem.suit} tileCount={entry.problem.tiles.length} />
+                                                            <TileImage key={j} num={n} suit={entry.problem.suit} tileCount={entry.problem.tiles.length}
+                                                                style={entry.problem.tiles.length >= 10 ? { height: '34px' } : undefined} />
                                                         ))}
                                                     </div>
                                                     </div>
