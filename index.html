@@ -237,7 +237,7 @@
             1166678-169
         `);
 
-        // --- 10枚形 問題データ（79問）---
+        // --- 10枚形 問題データ（80問）---
         const ALL_PROBLEMS_10 = parseData(`
             2233445599-259
             2233334445-246
@@ -269,6 +269,7 @@
             2224567999-3478
             1112345679-89
             1234555678-14369
+            2345666789-12457
             3456666788-2587
             2222333444-1345
             2223456677-5678
@@ -337,31 +338,33 @@
         // --- ランク定義 ---
         const getRankInfo = (score, drill, qCount) => {
             if (drill === '10') {
-                const isAll = qCount >= 79;
+                const isAll = qCount >= 80;
                 if (isAll) {
-                    if (score >= 610) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
-                    if (score >= 540) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
-                    if (score >= 480) return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
-                    if (score >= 430) return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
-                    if (score >= 390) return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
-                    if (score >= 360) return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
-                    if (score >= 330) return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
-                    if (score >= 300) return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
-                    if (score >= 260) return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
-                    if (score >= 180) return { rank: 'D',  color: 'text-black',    comment: '10枚形が仲間になりたそうにコチラを見ている' };
-                    return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの10枚形のようだ。' };
+                    if (score >= 2240) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
+                    if (score >= 2120) return { rank: 'SS',  color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+                    if (score >= 2000) return { rank: 'S',   color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+                    if (score >= 1800) return { rank: 'A+',  color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                    if (score >= 1600) return { rank: 'A',   color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
+                    if (score >= 1400) return { rank: 'A-',  color: 'text-red-600', comment: '行くぜ、坊や！！' };
+                    if (score >= 1200) return { rank: 'B+',  color: 'text-green-600', comment: '倍プッシュだ…！' };
+                    if (score >= 1000) return { rank: 'B',   color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+                    if (score >= 800)  return { rank: 'B-',  color: 'text-green-600', comment: '熱い三流なら上等よ' };
+                    if (score >= 600)  return { rank: 'C',   color: 'text-blue-600', comment: 'まだまだだね' };
+                    if (score >= 400)  return { rank: 'D',   color: 'text-slate-300', comment: '10枚形が仲間になりたそうにコチラを見ている' };
+                    return                     { rank: 'E',   color: 'text-slate-400', comment: 'へんじが無い。ただの10枚形のようだ。' };
                 } else {
-                    if (score >= 380) return { rank: 'SS', color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
-                    if (score >= 360) return { rank: 'S',  color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
-                    if (score >= 345) return { rank: 'A+', color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
-                    if (score >= 330) return { rank: 'A',  color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
-                    if (score >= 315) return { rank: 'A-', color: 'text-red-600', comment: '行くぜ、坊や！！' };
-                    if (score >= 300) return { rank: 'B+', color: 'text-green-600', comment: '倍プッシュだ…！' };
-                    if (score >= 285) return { rank: 'B',  color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
-                    if (score >= 270) return { rank: 'B-', color: 'text-green-600', comment: '熱い三流なら上等よ' };
-                    if (score >= 240) return { rank: 'C',  color: 'text-blue-600', comment: 'まだまだだね' };
-                    if (score >= 200) return { rank: 'D',  color: 'text-black',    comment: '10枚形が仲間になりたそうにコチラを見ている' };
-                    return                    { rank: 'E',  color: 'text-slate-400', comment: 'へんじが無い。ただの10枚形のようだ。' };
+                    if (score >= 560) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
+                    if (score >= 530) return { rank: 'SS',  color: 'rainbow-text', comment: '『Congratulations!Congratulations!……』' };
+                    if (score >= 500) return { rank: 'S',   color: 'gold-text',    comment: '『狂気の沙汰ほど面白い……！』' };
+                    if (score >= 460) return { rank: 'A+',  color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                    if (score >= 420) return { rank: 'A',   color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
+                    if (score >= 385) return { rank: 'A-',  color: 'text-red-600', comment: '行くぜ、坊や！！' };
+                    if (score >= 350) return { rank: 'B+',  color: 'text-green-600', comment: '倍プッシュだ…！' };
+                    if (score >= 315) return { rank: 'B',   color: 'text-green-600', comment: 'こざかしいことと無関係のところに強者は存在する' };
+                    if (score >= 280) return { rank: 'B-',  color: 'text-green-600', comment: '熱い三流なら上等よ' };
+                    if (score >= 230) return { rank: 'C',   color: 'text-blue-600', comment: 'まだまだだね' };
+                    if (score >= 170) return { rank: 'D',   color: 'text-slate-300', comment: '10枚形が仲間になりたそうにコチラを見ている' };
+                    return                     { rank: 'E',   color: 'text-slate-400', comment: 'へんじが無い。ただの10枚形のようだ。' };
                 }
             }
             if (drill === '7') {
@@ -450,7 +453,7 @@
         function App() {
             const [drill, setDrill]     = useState(null); // null | '6' | '7' | '10'
             const [mode, setMode]       = useState(null); // null | 'practice' | 'timeattack'
-            const [questionCount, setQuestionCount] = useState(null); // null | 20 | 79
+            const [questionCount, setQuestionCount] = useState(null); // null | 20 | 80
             const [problemStack, setProblemStack]   = useState([]);
             const [currentIdx, setCurrentIdx]       = useState(0);
             const [selectedAnswers, setSelectedAnswers] = useState([]);
@@ -475,6 +478,7 @@
             const [favorites, setFavorites] = useState([]);
             const [reviewBucket, setReviewBucket] = useState([]);
             const [showFavorites, setShowFavorites] = useState(false);
+            const [showReview, setShowReview] = useState(false);
             const [lastResult, setLastResult] = useState(null); // null | 'correct' | 'incorrect'
             const [uraMode, setUraMode] = useState(false);
             const [uraGameOver, setUraGameOver] = useState(false);
@@ -623,6 +627,8 @@
 
             const toggleAnswer = (num) => {
                 if (isSubmitted) return;
+                const cpNow = problemStack[currentIdx];
+                if (cpNow && cpNow.tiles.filter(t => t === num).length >= 4) return; // 4倍使いは選択不可
 
                 if (mode === 'ura') {
                     if (selectedAnswers.includes(num)) return; // 裏モードは選択解除不可
@@ -787,6 +793,7 @@
             const startReviewGame = () => {
                 SoundEffect.playTap();
                 SoundEffect.init();
+                setShowReview(false);
                 pendingStatsRef.current = null;
                 const stack = reviewBucket.map(b => ({
                     tiles: b.tiles, answers: b.answers, suit: b.suit, bucketId: b.id
@@ -821,6 +828,79 @@
                     return updated;
                 });
             };
+
+            // ========== 復習一覧画面 ==========
+            if (!drill && showReview) {
+                return (
+                    <div className="h-screen scroll-screen bg-slate-50 p-4">
+                        <div className="max-w-md mx-auto">
+                            <div className="flex items-center justify-between mb-4 pt-4">
+                                <h2 className="text-xl font-black text-slate-800">🔄 復習リスト</h2>
+                                <button onClick={() => setShowReview(false)}
+                                    className="text-sm px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-full font-bold transition-colors">
+                                    ← 戻る
+                                </button>
+                            </div>
+
+                            {reviewBucket.length === 0 ? (
+                                <p className="text-center text-slate-400 font-bold mt-16">復習リストは空です</p>
+                            ) : (
+                                <>
+                                    <button onClick={startReviewGame}
+                                        className="w-full py-4 btn-review text-white rounded-2xl font-black text-lg shadow mb-4 transition-all active:scale-95">
+                                        まとめて練習する（{reviewBucket.length}問）
+                                    </button>
+
+                                    <div className="space-y-3">
+                                        {reviewBucket.map((rv) => {
+                                            const alreadyFaved = favorites.some(f =>
+                                                JSON.stringify(f.tiles) === JSON.stringify(rv.tiles) && f.suit === rv.suit
+                                            );
+                                            return (
+                                                <div key={rv.id} className="bg-white border border-slate-200 rounded-2xl p-3">
+                                                    <div className="overflow-x-auto mb-2">
+                                                        <div className="problem-tile-group">
+                                                            {rv.tiles.slice().sort((a, b) => a - b).map((n, j) => (
+                                                                <TileImage key={j} num={n} suit={rv.suit} tileCount={rv.tiles.length} />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2 text-xs">
+                                                            <span className="text-slate-400 font-bold">正解</span>
+                                                            <div className="flex gap-1">
+                                                                {rv.answers.slice().sort((a, b) => a - b).map((n, j) => (
+                                                                    <span key={j} className="w-6 h-7 bg-green-50 border border-green-300 rounded flex items-center justify-center font-black text-green-600">{n}</span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-1">
+                                                            <button onClick={() => alreadyFaved ? null : addFavorite({ problem: rv })}
+                                                                className={`text-xs px-2 py-1 rounded-lg font-bold transition-colors ${alreadyFaved ? 'bg-yellow-100 text-yellow-400 cursor-default' : 'bg-slate-100 hover:bg-yellow-100 hover:text-yellow-600 text-slate-400'}`}>
+                                                                {alreadyFaved ? '⭐済' : '⭐追加'}
+                                                            </button>
+                                                            <button onClick={() => {
+                                                                setReviewBucket(prev => {
+                                                                    const updated = prev.filter(r => r.id !== rv.id);
+                                                                    localStorage.setItem('mahjong_review_bucket', JSON.stringify(updated));
+                                                                    return updated;
+                                                                });
+                                                            }}
+                                                                className="text-xs px-2 py-1 bg-slate-100 hover:bg-red-100 hover:text-red-500 text-slate-400 rounded-lg font-bold transition-colors">
+                                                                ✕ 削除
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
 
             // ========== お気に入り一覧画面 ==========
             if (!drill && showFavorites) {
@@ -877,7 +957,7 @@
                 const unlocked6      = isRankSOrAbove(bestScore6, '6');
                 const unlocked7      = isRankSOrAbove(bestScore7, '7');
                 const unlocked10_20  = isRankSOrAbove(bestScore10_20, '10', 20);
-                const unlocked10_all = isRankSOrAbove(bestScore10_all, '10', 79);
+                const unlocked10_all = isRankSOrAbove(bestScore10_all, '10', 80);
 
                 const uColor6  = { border: 'border-indigo-200',  bg: 'bg-indigo-50',  title: 'text-indigo-900',  bestBg: 'bg-white border border-indigo-100',  btn2: 'btn-orange' };
                 const uColor7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', bestBg: 'bg-white border border-emerald-100', btn2: 'btn-orange' };
@@ -959,18 +1039,18 @@
                                 <UCard title="10枚形" color={uColor10}>
                                     <div className="flex gap-2 mb-2">
                                         <UBtn label="ランダム20問" locked={!unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
-                                        <UBtn label="全79問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 79)} />
+                                        <UBtn label="全80問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 80)} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <UBest score={bestScore10_20}  drill="10" qCount={20}  color={uColor10} elapsed={bestElapsed10_20} />
-                                        <UBest score={bestScore10_all} drill="10" qCount={79}  color={uColor10} elapsed={bestElapsed10_all} />
+                                        <UBest score={bestScore10_all} drill="10" qCount={80}  color={uColor10} elapsed={bestElapsed10_all} />
                                     </div>
                                 </UCard>
                             </div>
 
                             <hr className="border-gray-600 mt-3" />
                             <div className="flex gap-2 pt-3">
-                                <button onClick={reviewBucket.length > 0 ? startReviewGame : undefined}
+                                <button onClick={reviewBucket.length > 0 ? () => setShowReview(true) : undefined}
                                     className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1 ${reviewBucket.length > 0 ? 'btn-review' : 'bg-gray-800 text-gray-600 cursor-default'}`}>
                                     🔄 復習
                                     <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white/20 text-white' : 'bg-gray-700 text-gray-600'}`}>{reviewBucket.length}</span>
@@ -1073,14 +1153,14 @@
                                                 className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
                                                 ランダム20問
                                             </button>
-                                            <button onClick={() => startNewGame('timeattack', '10', 79)}
+                                            <button onClick={() => startNewGame('timeattack', '10', 80)}
                                                 className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
-                                                全79問
+                                                全80問
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <BestBadge score={bestScore10_20}  drill="10" qCount={20} color={color10} elapsed={bestElapsed10_20} />
-                                            <BestBadge score={bestScore10_all} drill="10" qCount={79} color={color10} elapsed={bestElapsed10_all} />
+                                            <BestBadge score={bestScore10_all} drill="10" qCount={80} color={color10} elapsed={bestElapsed10_all} />
                                         </div>
                                     </>}
                                 />
@@ -1088,7 +1168,7 @@
 
                             <hr className="border-slate-200 mt-3" />
                             <div className="flex gap-2 pt-3">
-                                <button onClick={reviewBucket.length > 0 ? startReviewGame : undefined}
+                                <button onClick={reviewBucket.length > 0 ? () => setShowReview(true) : undefined}
                                     className={`flex-1 py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-1 ${reviewBucket.length > 0 ? 'btn-review' : 'bg-rose-100 text-rose-300 cursor-default'}`}>
                                     🔄 復習
                                     <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${reviewBucket.length > 0 ? 'bg-white/20 text-white' : 'bg-rose-200 text-rose-300'}`}>{reviewBucket.length}</span>
@@ -1371,17 +1451,21 @@
 
                         {/* 回答ボタン 1〜9 */}
                         <div className="grid grid-cols-3 gap-0 w-full max-w-[360px] mb-8">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => {
+                                const isQuad = currentProblem.tiles.filter(t => t === n).length >= 4;
+                                return (
                                 <button
                                     key={n}
                                     onClick={() => toggleAnswer(n)}
-                                    disabled={isSubmitted && !dark}
+                                    disabled={isQuad || (isSubmitted && !dark)}
                                     className={`aspect-video rounded-xl flex items-center justify-center text-4xl font-black transition-all
-                                        ${selectedAnswers.includes(n)
-                                            ? 'bg-indigo-500 text-white scale-95 shadow-inner'
-                                            : dark
-                                                ? 'bg-gray-800 text-gray-100 border-2 border-gray-600 shadow-sm'
-                                                : 'bg-white text-slate-700 border-2 border-slate-200 shadow-sm'}
+                                        ${isQuad
+                                            ? (dark ? 'bg-gray-900 text-gray-600 border-2 border-gray-700 cursor-not-allowed' : 'bg-slate-100 text-slate-300 border-2 border-slate-200 cursor-not-allowed')
+                                            : selectedAnswers.includes(n)
+                                                ? 'bg-indigo-500 text-white scale-95 shadow-inner'
+                                                : dark
+                                                    ? 'bg-gray-800 text-gray-100 border-2 border-gray-600 shadow-sm'
+                                                    : 'bg-white text-slate-700 border-2 border-slate-200 shadow-sm'}
                                         ${isSubmitted && currentProblem.answers.includes(n)
                                             ? 'ring-4 ring-yellow-400 z-10'
                                             : ''}
@@ -1389,7 +1473,8 @@
                                 >
                                     {n}
                                 </button>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {/* 確定ボタン / 正解表示（裏モードでは非表示） */}
