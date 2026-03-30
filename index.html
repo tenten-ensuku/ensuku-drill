@@ -818,10 +818,12 @@
             };
 
             // iOS スクロールコンテナ内で click が握り潰される問題を回避するためのヘルパー
-            // onTouchEnd + preventDefault でスクロール判定前に処理を実行、onClick でデスクトップをカバー
+            // onTouchEnd は iOS がスクロール判定すると touchcancel に差し替えられ発火しないため
+            // onTouchStart を使用（スクロール判定より前に必ず発火）
+            // preventDefault で後続の click 発火を抑制し二重実行を防止
             const tap = (handler) => ({
                 onClick: handler,
-                onTouchEnd: (e) => { e.preventDefault(); handler(); }
+                onTouchStart: (e) => { e.preventDefault(); handler(); }
             });
 
             // ========== 復習一覧画面 ==========
