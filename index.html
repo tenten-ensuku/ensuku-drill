@@ -480,6 +480,7 @@
             const [favorites, setFavorites] = useState(() => {
                 try { const s = localStorage.getItem('mahjong_favorites'); return s ? JSON.parse(s) : []; } catch { return []; }
             });
+            const fromTouchRef = useRef(false); // iOS tap ヘルパー用フラグ
             const [reviewBucket, setReviewBucket] = useState(() => {
                 try { const s = localStorage.getItem('mahjong_review_bucket'); return s ? JSON.parse(s) : []; } catch { return []; }
             });
@@ -818,12 +819,20 @@
             };
 
             // iOS スクロールコンテナ内で click が握り潰される問題を回避するためのヘルパー
-            // onTouchEnd は iOS がスクロール判定すると touchcancel に差し替えられ発火しないため
-            // onTouchStart を使用（スクロール判定より前に必ず発火）
-            // preventDefault で後続の click 発火を抑制し二重実行を防止
+            // preventDefault を使わず（使うと iOS WebKit が touchstart 配信を止める）、
+            // useRef フラグ + setTimeout で touch→click の二重実行を防止
             const tap = (handler) => ({
-                onClick: handler,
-                onTouchStart: (e) => { e.preventDefault(); handler(); }
+                onTouchStart: () => {
+                    fromTouchRef.current = true;
+                    setTimeout(handler, 0);
+                },
+                onClick: () => {
+                    if (fromTouchRef.current) {
+                        fromTouchRef.current = false;
+                    } else {
+                        handler();
+                    }
+                }
             });
 
             // ========== 復習一覧画面 ==========
