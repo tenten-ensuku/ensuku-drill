@@ -20,9 +20,11 @@
         body { font-family: 'Inter', sans-serif; }
         .scroll-screen {
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
             touch-action: pan-y;
+        }
+        button {
+            touch-action: manipulation;
         }
 
         @keyframes resultPop {
@@ -475,8 +477,12 @@
             const timerRef = useRef(null);
             const pendingStatsRef = useRef(null);
             const [wrongLog, setWrongLog] = useState([]);
-            const [favorites, setFavorites] = useState([]);
-            const [reviewBucket, setReviewBucket] = useState([]);
+            const [favorites, setFavorites] = useState(() => {
+                try { const s = localStorage.getItem('mahjong_favorites'); return s ? JSON.parse(s) : []; } catch { return []; }
+            });
+            const [reviewBucket, setReviewBucket] = useState(() => {
+                try { const s = localStorage.getItem('mahjong_review_bucket'); return s ? JSON.parse(s) : []; } catch { return []; }
+            });
             const [showFavorites, setShowFavorites] = useState(false);
             const [showReview, setShowReview] = useState(false);
             const [lastResult, setLastResult] = useState(null); // null | 'correct' | 'incorrect'
@@ -494,17 +500,13 @@
                 });
             }, []);
 
-            // 自己ベストをlocalStorageから読み込み
+            // favorites / reviewBucket の変更を localStorage に同期
             useEffect(() => {
-                try {
-                    const saved = localStorage.getItem('mahjong_favorites');
-                    if (saved) setFavorites(JSON.parse(saved));
-                } catch (_) {}
-                try {
-                    const saved = localStorage.getItem('mahjong_review_bucket');
-                    if (saved) setReviewBucket(JSON.parse(saved));
-                } catch (_) {}
-            }, []);
+                localStorage.setItem('mahjong_favorites', JSON.stringify(favorites));
+            }, [favorites]);
+            useEffect(() => {
+                localStorage.setItem('mahjong_review_bucket', JSON.stringify(reviewBucket));
+            }, [reviewBucket]);
 
             useEffect(() => {
                 const parseScore = (v) => {
@@ -644,9 +646,7 @@
                         setReviewBucket(prev => {
                             if (prev.some(b => JSON.stringify(b.tiles) + b.suit === key)) return prev;
                             const item = { id: Date.now(), tiles: cp.tiles, answers: cp.answers, suit: cp.suit };
-                            const updated = [...prev, item];
-                            localStorage.setItem('mahjong_review_bucket', JSON.stringify(updated));
-                            return updated;
+                            return [...prev, item];
                         });
                         setUraGameOver(true);
                         setIsSubmitted(true);
@@ -690,11 +690,7 @@
                     SoundEffect.playCorrect();
                     // 復習モードで正解 → バケットから削除
                     if (mode === 'review' && currentProblem.bucketId) {
-                        setReviewBucket(prev => {
-                            const updated = prev.filter(b => b.id !== currentProblem.bucketId);
-                            localStorage.setItem('mahjong_review_bucket', JSON.stringify(updated));
-                            return updated;
-                        });
+                        setReviewBucket(prev => prev.filter(b => b.id !== currentProblem.bucketId));
                     }
                 } else {
                     setIncorrectCount(i => i + 1);
@@ -706,9 +702,7 @@
                         setReviewBucket(prev => {
                             if (prev.some(b => JSON.stringify(b.tiles) + b.suit === key)) return prev;
                             const item = { id: Date.now(), tiles: currentProblem.tiles, answers: currentProblem.answers, suit: currentProblem.suit };
-                            const updated = [...prev, item];
-                            localStorage.setItem('mahjong_review_bucket', JSON.stringify(updated));
-                            return updated;
+                            return [...prev, item];
                         });
                     }
                 }
@@ -816,17 +810,11 @@
 
             const addFavorite = (entry) => {
                 const fav = { id: Date.now(), ...entry.problem, addedAt: Date.now() };
-                const updated = [...favorites, fav];
-                setFavorites(updated);
-                localStorage.setItem('mahjong_favorites', JSON.stringify(updated));
+                setFavorites(prev => [...prev, fav]);
             };
 
             const removeFavorite = (id) => {
-                setFavorites(prev => {
-                    const updated = prev.filter(f => f.id !== id);
-                    localStorage.setItem('mahjong_favorites', JSON.stringify(updated));
-                    return updated;
-                });
+                setFavorites(prev => prev.filter(f => f.id !== id));
             };
 
             // ========== 復習一覧画面 ==========
@@ -880,13 +868,7 @@
                                                                 className={`text-xs px-2 py-1 rounded-lg font-bold transition-colors ${alreadyFaved ? 'bg-yellow-100 text-yellow-400 cursor-default' : 'bg-slate-100 hover:bg-yellow-100 hover:text-yellow-600 text-slate-400'}`}>
                                                                 {alreadyFaved ? '⭐済' : '⭐追加'}
                                                             </button>
-                                                            <button onClick={() => {
-                                                                setReviewBucket(prev => {
-                                                                    const updated = prev.filter(r => r.id !== rv.id);
-                                                                    localStorage.setItem('mahjong_review_bucket', JSON.stringify(updated));
-                                                                    return updated;
-                                                                });
-                                                            }}
+                                                            <button onClick={() => setReviewBucket(prev => prev.filter(r => r.id !== rv.id))}
                                                                 className="text-xs px-2 py-1 bg-slate-100 hover:bg-red-100 hover:text-red-500 text-slate-400 rounded-lg font-bold transition-colors">
                                                                 ✕ 削除
                                                             </button>
