@@ -129,6 +129,8 @@
             ctx: null,
             init() {
                 if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                // iOS は AudioContext が suspended のままのことがあるため resume する
+                if (this.ctx.state === 'suspended') this.ctx.resume();
             },
             playCorrect() {
                 this.init();
@@ -824,6 +826,8 @@
             const tap = (handler) => ({
                 onTouchStart: () => {
                     fromTouchRef.current = true;
+                    // タップイベント内で AudioContext を unlock（iOS 対策）
+                    SoundEffect.init();
                     setTimeout(handler, 0);
                 },
                 onClick: () => {
