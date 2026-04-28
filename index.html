@@ -1159,6 +1159,8 @@
                 const color7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', sub: 'text-emerald-500', btn1: 'bg-emerald-500 hover:bg-emerald-600', btn2: 'btn-orange', bestBg: 'bg-white border border-emerald-100' };
                 const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'btn-orange', bestBg: 'bg-white border border-violet-100' };
 
+                const unlocked10 = isRankSOrAbove(bestScore7, '7');
+
                 return (
                     <div className="h-screen overflow-hidden flex items-center justify-center p-4">
                         <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-5 border border-slate-100">
@@ -1197,8 +1199,8 @@
                                         </>}
                                     />
                                 </div>
-                                <DrillCard d="10" title="10枚形" color={color10}
-                                    buttons={<>
+                                <DrillCard d="10" title="10枚形" color={unlocked10 ? color10 : { border: 'border-slate-200', bg: 'bg-slate-50', title: 'text-slate-400' }}
+                                    buttons={unlocked10 ? <>
                                         <div className="flex gap-2 mb-3">
                                             <button onClick={() => startNewGame('timeattack', '10', 20)}
                                                 className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
@@ -1212,6 +1214,11 @@
                                         <div className="grid grid-cols-2 gap-2">
                                             <BestBadge score={bestScore10_20}  drill="10" qCount={20} color={color10} elapsed={bestElapsed10_20} />
                                             <BestBadge score={bestScore10_all} drill="10" qCount={80} color={color10} elapsed={bestElapsed10_all} />
+                                        </div>
+                                    </> : <>
+                                        <div className="flex flex-col items-center justify-center py-3 gap-1">
+                                            <div className="text-2xl">🔒</div>
+                                            <div className="text-xs text-slate-400 font-bold text-center">7枚形で S ランク以上で解放</div>
                                         </div>
                                     </>}
                                 />
