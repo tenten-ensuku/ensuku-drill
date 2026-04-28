@@ -649,7 +649,7 @@
             };
 
             useEffect(() => {
-                if (startTime && !isFinished) {
+                if (startTime && !isFinished && !uraGameOver) {
                     timerRef.current = setInterval(() => {
                         setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
                     }, 1000);
@@ -657,7 +657,7 @@
                     clearInterval(timerRef.current);
                 }
                 return () => clearInterval(timerRef.current);
-            }, [startTime, isFinished]);
+            }, [startTime, isFinished, uraGameOver]);
 
             // キーボード入力（テンキー対応）
             useEffect(() => {
