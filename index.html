@@ -68,6 +68,10 @@
         .record-badge {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        @keyframes result-flash {
+            0%   { opacity: 0.85; }
+            100% { opacity: 0; }
+        }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -493,6 +497,12 @@
             const [uraGameOver, setUraGameOver] = useState(false);
             const [uraLockMsg, setUraLockMsg] = useState(null);
 
+            // 結果演出（案C：カウントアップ）
+            const [countScore, setCountScore] = useState(0);
+            const [showRank, setShowRank] = useState(false);
+            const [showComment, setShowComment] = useState(false);
+            const [showFlash, setShowFlash] = useState(false);
+
             // 全スートの牌画像プリロード
             useEffect(() => {
                 ['man', 'pin', 'sou'].forEach(suit => {
@@ -502,6 +512,36 @@
                     }
                 });
             }, []);
+
+            // 結果画面：カウントアップ演出
+            useEffect(() => {
+                if (!isFinished) return;
+                const timeBonus  = Math.max(0, questionCount * 20 - elapsedTime);
+                const finalScore = Math.max(0, correctCount * 10 - incorrectCount * 20 + timeBonus);
+                setCountScore(0);
+                setShowRank(false);
+                setShowComment(false);
+                setShowFlash(false);
+                const duration = 1400;
+                const start = performance.now();
+                let rafId;
+                function update(now) {
+                    const t = Math.min((now - start) / duration, 1);
+                    const eased = 1 - Math.pow(1 - t, 3);
+                    setCountScore(Math.round(eased * finalScore));
+                    if (t < 1) {
+                        rafId = requestAnimationFrame(update);
+                    } else {
+                        setCountScore(finalScore);
+                        setShowFlash(true);
+                        setTimeout(() => setShowFlash(false), 400);
+                        setTimeout(() => setShowRank(true), 150);
+                        setTimeout(() => setShowComment(true), 400);
+                    }
+                }
+                rafId = requestAnimationFrame(update);
+                return () => cancelAnimationFrame(rafId);
+            }, [isFinished]);
 
             // favorites / reviewBucket の変更を localStorage に同期
             useEffect(() => {
@@ -1263,6 +1303,11 @@
                     <div className="h-screen scroll-screen p-4">
                         <div className="min-h-full flex items-center justify-center">
                         <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl p-8 text-center relative overflow-hidden">
+                            {/* フラッシュオーバーレイ */}
+                            {showFlash && (
+                                <div className="absolute inset-0 bg-white rounded-[2rem] pointer-events-none"
+                                    style={{animation: 'result-flash 0.4s ease-out forwards'}} />
+                            )}
                             {isNewRecord && (
                                 <div className="absolute top-4 right-[-35px] bg-yellow-400 text-yellow-900 text-[10px] font-black py-1 px-10 rotate-45 shadow-sm record-badge">
                                     NEW RECORD
@@ -1271,14 +1316,21 @@
 
                             <div className="text-xs font-bold text-slate-400 mb-1">{drillLabel}</div>
                             <h2 className="text-2xl font-bold mb-2 text-slate-800">結果発表</h2>
-                            <div className={`text-7xl font-black mb-2 italic ${rankInfo.color}`}>{rankInfo.rank}</div>
+
+                            {/* ランク：カウントアップ後にフェードイン */}
+                            <div className={`text-7xl font-black mb-2 italic ${rankInfo.color}`}
+                                style={{opacity: showRank ? 1 : 0, transform: showRank ? 'scale(1)' : 'scale(0.6)', transition: 'opacity 0.4s cubic-bezier(0.34,1.56,0.64,1), transform 0.4s cubic-bezier(0.34,1.56,0.64,1)'}}>
+                                {rankInfo.rank}
+                            </div>
 
                             <div className="mb-4">
                                 {isNewRecord && <div className="text-orange-500 font-black text-sm mb-1 animate-bounce">記録更新！</div>}
-                                <div className="text-4xl font-black text-slate-700">{finalScore} <span className="text-lg">pt</span></div>
+                                {/* スコア：カウントアップ */}
+                                <div className="text-4xl font-black text-slate-700">{countScore} <span className="text-lg">pt</span></div>
                             </div>
 
-                            <p className="text-slate-600 font-bold mb-8 px-4 leading-relaxed min-h-[3rem] flex items-center justify-center">
+                            <p className="text-slate-600 font-bold mb-8 px-4 leading-relaxed min-h-[3rem] flex items-center justify-center"
+                                style={{opacity: showComment ? 1 : 0, transition: 'opacity 0.5s'}}>
                                 {rankInfo.comment}
                             </p>
 
