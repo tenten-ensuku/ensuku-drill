@@ -72,6 +72,13 @@
             0%   { opacity: 0.85; }
             100% { opacity: 0; }
         }
+        @keyframes gameover-fadein {
+            0%   { opacity: 0; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .gameover-overlay {
+            animation: gameover-fadein 0.5s cubic-bezier(0.34,1.2,0.64,1) 0.7s both;
+        }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -1230,36 +1237,6 @@
                 );
             }
 
-            // ========== 裏モード：ゲームオーバー画面 ==========
-            if (isFinished && mode === 'ura' && uraGameOver) {
-                return (
-                    <div className="h-screen overflow-hidden bg-gray-950 flex items-center justify-center p-4">
-                        <div className="max-w-md w-full bg-gray-900 rounded-[2rem] shadow-2xl p-8 text-center border border-gray-700">
-                            <div className="text-7xl mb-4">💀</div>
-                            <h2 className="text-4xl font-black text-white mb-1 tracking-widest">GAME OVER</h2>
-                            <p className="text-gray-400 text-sm mb-6">{currentIdx + 1}問目で終了</p>
-                            <div className="grid grid-cols-2 gap-3 mb-6">
-                                <div className="bg-gray-800 border border-gray-600 rounded-2xl p-3">
-                                    <div className="text-green-400 font-black text-3xl">{correctCount}</div>
-                                    <div className="text-gray-400 font-bold text-xs mt-1">正解</div>
-                                </div>
-                                <div className="bg-gray-800 border border-red-900 rounded-2xl p-3">
-                                    <div className="text-red-400 font-black text-3xl">{elapsedTime}秒</div>
-                                    <div className="text-gray-400 font-bold text-xs mt-1">経過時間</div>
-                                </div>
-                            </div>
-                            <button onClick={resetToHome}
-                                className="w-full py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-2xl font-black text-lg transition-all active:scale-95 mb-3">
-                                メニューに戻る
-                            </button>
-                            <button onClick={() => startNewGame(mode, drill, questionCount)}
-                                className="w-full py-4 bg-orange-500 hover:bg-orange-400 text-white rounded-2xl font-black text-lg transition-all active:scale-95">
-                                もう一度
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
 
 
             // ========== 復習モード結果画面 ==========
@@ -1554,6 +1531,36 @@
                             )}
                         </div>
                     </div>
+
+                    {/* 裏モード：GAME OVER オーバーレイ */}
+                    {uraGameOver && (
+                        <div className="absolute inset-0 z-50 flex items-center justify-center p-4"
+                            style={{background: 'rgba(3,7,18,0.82)', backdropFilter: 'blur(2px)'}}>
+                            <div className="gameover-overlay max-w-xs w-full bg-gray-900 rounded-[2rem] shadow-2xl p-8 text-center border border-gray-700">
+                                <div className="text-7xl mb-4">💀</div>
+                                <h2 className="text-4xl font-black text-white mb-1 tracking-widest">GAME OVER</h2>
+                                <p className="text-gray-400 text-sm mb-6">{currentIdx + 1}問目で終了</p>
+                                <div className="grid grid-cols-2 gap-3 mb-6">
+                                    <div className="bg-gray-800 border border-gray-600 rounded-2xl p-3">
+                                        <div className="text-green-400 font-black text-3xl">{correctCount}</div>
+                                        <div className="text-gray-400 font-bold text-xs mt-1">正解</div>
+                                    </div>
+                                    <div className="bg-gray-800 border border-red-900 rounded-2xl p-3">
+                                        <div className="text-red-400 font-black text-3xl">{elapsedTime}秒</div>
+                                        <div className="text-gray-400 font-bold text-xs mt-1">経過時間</div>
+                                    </div>
+                                </div>
+                                <button onClick={resetToHome}
+                                    className="w-full py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-2xl font-black text-lg transition-all active:scale-95 mb-3">
+                                    メニューに戻る
+                                </button>
+                                <button onClick={() => startNewGame(mode, drill, questionCount)}
+                                    className="w-full py-4 bg-orange-500 hover:bg-orange-400 text-white rounded-2xl font-black text-lg transition-all active:scale-95">
+                                    もう一度
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
