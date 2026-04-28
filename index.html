@@ -344,10 +344,10 @@
             if (drill === '10') {
                 const isAll = qCount >= 80;
                 if (isAll) {
-                    if (score >= 2240) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
-                    if (score >= 2120) return { rank: 'SS',  color: 'rainbow-text', comment: 'Congratulations!Congratulations!……' };
-                    if (score >= 2000) return { rank: 'S',   color: 'gold-text',    comment: '狂気の沙汰ほど面白い……！' };
-                    if (score >= 1800) return { rank: 'A+',  color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                    if (score >= 2240) return { rank: 'SSS', color: 'rainbow-text', comment: 'みんなには内緒だよ！' };
+                    if (score >= 2120) return { rank: 'SS',  color: 'rainbow-text', comment: 'キミは神になるつもりかい！？' };
+                    if (score >= 2000) return { rank: 'S',   color: 'gold-text',    comment: 'Congratulations!…Congratulations!…' };
+                    if (score >= 1800) return { rank: 'A+',  color: 'text-red-600', comment: '狂気の沙汰ほど面白い……！' };
                     if (score >= 1600) return { rank: 'A',   color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
                     if (score >= 1400) return { rank: 'A-',  color: 'text-red-600', comment: '行くぜ、坊や！！' };
                     if (score >= 1200) return { rank: 'B+',  color: 'text-green-600', comment: '倍プッシュだ…！' };
@@ -357,10 +357,10 @@
                     if (score >= 400)  return { rank: 'D',   color: 'text-slate-300', comment: '10枚形が仲間になりたそうにコチラを見ている' };
                     return                     { rank: 'E',   color: 'text-slate-400', comment: 'へんじが無い。ただの10枚形のようだ。' };
                 } else {
-                    if (score >= 560) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
-                    if (score >= 530) return { rank: 'SS',  color: 'rainbow-text', comment: 'Congratulations!Congratulations!……' };
-                    if (score >= 500) return { rank: 'S',   color: 'gold-text',    comment: '狂気の沙汰ほど面白い……！' };
-                    if (score >= 460) return { rank: 'A+',  color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                    if (score >= 560) return { rank: 'SSS', color: 'rainbow-text', comment: 'みんなには内緒だよ！' };
+                    if (score >= 530) return { rank: 'SS',  color: 'rainbow-text', comment: 'キミは神になるつもりかい！？' };
+                    if (score >= 500) return { rank: 'S',   color: 'gold-text',    comment: 'Congratulations!…Congratulations!…' };
+                    if (score >= 460) return { rank: 'A+',  color: 'text-red-600', comment: '狂気の沙汰ほど面白い……！' };
                     if (score >= 420) return { rank: 'A',   color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
                     if (score >= 385) return { rank: 'A-',  color: 'text-red-600', comment: '行くぜ、坊や！！' };
                     if (score >= 350) return { rank: 'B+',  color: 'text-green-600', comment: '倍プッシュだ…！' };
@@ -372,10 +372,10 @@
                 }
             }
             if (drill === '7') {
-                if (score >= 540) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
-                if (score >= 530) return { rank: 'SS',  color: 'rainbow-text', comment: 'Congratulations!Congratulations!……' };
-                if (score >= 520) return { rank: 'S',   color: 'gold-text',    comment: '狂気の沙汰ほど面白い……！' };
-                if (score >= 510) return { rank: 'A+',  color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+                if (score >= 540) return { rank: 'SSS', color: 'rainbow-text', comment: 'みんなには内緒だよ！' };
+                if (score >= 530) return { rank: 'SS',  color: 'rainbow-text', comment: 'キミは神になるつもりかい！？' };
+                if (score >= 520) return { rank: 'S',   color: 'gold-text',    comment: 'Congratulations!…Congratulations!…' };
+                if (score >= 510) return { rank: 'A+',  color: 'text-red-600', comment: '狂気の沙汰ほど面白い……！' };
                 if (score >= 500) return { rank: 'A',   color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
                 if (score >= 490) return { rank: 'A-',  color: 'text-red-600', comment: '行くぜ、坊や！！' };
                 if (score >= 480) return { rank: 'B+',  color: 'text-green-600', comment: '倍プッシュだ…！' };
@@ -386,10 +386,10 @@
                 return                    { rank: 'E',   color: 'text-slate-400', comment: 'へんじが無い。ただの7枚形のようだ。' };
             }
             // 6枚形（13問）
-            if (score >= 375) return { rank: 'SSS', color: 'rainbow-text', comment: '……無敵だ。これが真の牌賊。' };
-            if (score >= 365) return { rank: 'SS',  color: 'rainbow-text', comment: 'Congratulations!Congratulations!……' };
-            if (score >= 355) return { rank: 'S',   color: 'gold-text',    comment: '狂気の沙汰ほど面白い……！' };
-            if (score >= 345) return { rank: 'A+',  color: 'text-red-600', comment: '博奕打ちは嘘をつくんだ…' };
+            if (score >= 375) return { rank: 'SSS', color: 'rainbow-text', comment: 'みんなには内緒だよ！' };
+            if (score >= 365) return { rank: 'SS',  color: 'rainbow-text', comment: 'キミは神になるつもりかい！？' };
+            if (score >= 355) return { rank: 'S',   color: 'gold-text',    comment: 'Congratulations!…Congratulations!…' };
+            if (score >= 345) return { rank: 'A+',  color: 'text-red-600', comment: '狂気の沙汰ほど面白い……！' };
             if (score >= 335) return { rank: 'A',   color: 'text-red-600', comment: '強えっつっても兄さんのは昼間の麻雀だ' };
             if (score >= 325) return { rank: 'A-',  color: 'text-red-600', comment: '行くぜ、坊や！！' };
             if (score >= 315) return { rank: 'B+',  color: 'text-green-600', comment: '倍プッシュだ…！' };
