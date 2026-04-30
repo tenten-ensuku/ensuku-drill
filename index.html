@@ -1460,27 +1460,34 @@
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-2 gap-4 mb-8 text-left">
-                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">Score Stats</div>
-                                    <div className="flex justify-between items-center text-sm mb-1">
-                                        <span className="text-green-600 font-bold">正解 (+{correctCount * 10})</span>
-                                        <span className="text-slate-400 font-mono">x{correctCount}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm mb-1">
-                                        <span className="text-red-500 font-bold">ミス (-{incorrectCount * 20})</span>
-                                        <span className="text-slate-400 font-mono">x{incorrectCount}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-blue-500 font-bold">タイム (+{timeBonus})</span>
-                                        <span className="text-slate-400 font-mono">{elapsedTime}秒</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm mt-1">
-                                        <span className="text-slate-500 font-bold">1問あたり</span>
-                                        <span className="text-slate-400 font-mono">{(elapsedTime / questionCount).toFixed(1)}秒</span>
-                                    </div>
+                            <div className="grid grid-cols-2 gap-3 mb-6">
+                                {/* スコア内訳 */}
+                                <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                                    <table className="w-full text-sm" style={{borderCollapse:'collapse'}}>
+                                        <tbody>
+                                            <tr className="border-b border-slate-100">
+                                                <td className="py-2 pl-3 text-lg leading-none">⭕</td>
+                                                <td className="py-2 text-center font-black text-slate-700 w-8">{correctCount}</td>
+                                                <td className="py-2 pr-3 text-right font-bold text-slate-800">+{correctCount * 10}</td>
+                                            </tr>
+                                            <tr className="border-b border-slate-100">
+                                                <td className="py-2 pl-3"><span className="font-black text-xl text-blue-500">✕</span></td>
+                                                <td className="py-2 text-center font-black text-slate-700 w-8">{incorrectCount}</td>
+                                                <td className="py-2 pr-3 text-right font-bold text-slate-800">-{incorrectCount * 20}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-2 pl-3 text-lg leading-none">🕐</td>
+                                                <td className="py-2 pl-1 whitespace-nowrap">
+                                                    <div className="font-bold text-slate-700 text-xs">{elapsedTime}秒</div>
+                                                    <div className="text-slate-400 font-bold whitespace-nowrap" style={{fontSize:'10px'}}>{(elapsedTime / questionCount).toFixed(1)}秒/問</div>
+                                                </td>
+                                                <td className="py-2 pr-3 text-right font-bold text-slate-800 whitespace-nowrap">+{timeBonus}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center items-center">
+                                {/* 自己ベスト */}
+                                <div className="bg-slate-50 rounded-2xl border border-slate-100 flex flex-col justify-center items-center py-3">
                                     <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">自己ベスト</div>
                                     {bs !== -9999
                                         ? <BestScoreDisplay score={bs} drill={drill} qCount={questionCount} size="sm" />
