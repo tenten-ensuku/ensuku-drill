@@ -649,6 +649,11 @@
                 const { rank } = getRankInfo(score, d, qc);
                 return URA_RANK_ORDER.indexOf(rank) >= URA_RANK_ORDER.indexOf('S');
             };
+            const isRankAOrAbove = (score, d, qc) => {
+                if (score === -9999) return false;
+                const { rank } = getRankInfo(score, d, qc);
+                return URA_RANK_ORDER.indexOf(rank) >= URA_RANK_ORDER.indexOf('A');
+            };
 
             const startNewGame = (m, d, qc) => {
                 SoundEffect.playTap();
@@ -861,20 +866,28 @@
                     setIsNewRecord(true);
                     SoundEffect.playLevelUp();
 
-                    // 新規Sランク解放チェック
-                    const wasLocked = !isRankSOrAbove(currentBest, drill, questionCount);
-                    const nowUnlocked = isRankSOrAbove(score, drill, questionCount);
-                    if (wasLocked && nowUnlocked) {
+                    // 表モード10枚形：7枚形Aランク達成で解放
+                    if (drill === '7') {
+                        const wasLocked10 = !isRankAOrAbove(currentBest, '7');
+                        const nowUnlocked10 = isRankAOrAbove(score, '7');
+                        if (wasLocked10 && nowUnlocked10) {
+                            setUnlockMsg('表モード「10枚形」');
+                            setJustUnlockedDrill('7');
+                        }
+                    }
+                    // 裏モード：Sランク達成で解放
+                    const wasLockedS = !isRankSOrAbove(currentBest, drill, questionCount);
+                    const nowUnlockedS = isRankSOrAbove(score, drill, questionCount);
+                    if (wasLockedS && nowUnlockedS) {
                         let msg = '';
-                        if (drill === '6')                              msg = '裏モード「6枚形」';
-                        else if (drill === '7')                         msg = '裏モード「7枚形」& 10枚形';
+                        if (drill === '6')                               msg = '裏モード「6枚形」';
+                        else if (drill === '7')                          msg = '裏モード「7枚形」';
                         else if (drill === '10' && questionCount === 20) msg = '裏モード「ランダム20問」';
                         else if (drill === '10')                         msg = '裏モード「全80問」';
                         if (msg) {
                             setUnlockMsg(msg);
-                            // ホーム画面で爆破するカード（表：10枚形 / 裏：各ボタン）
                             if (drill === '6')                               setJustUnlockedDrill('6');
-                            else if (drill === '7')                          setJustUnlockedDrill('7');
+                            else if (drill === '7')                          setJustUnlockedDrill('7_ura');
                             else if (drill === '10' && questionCount === 20)  setJustUnlockedDrill('10_20');
                             else if (drill === '10')                          setJustUnlockedDrill('10_80');
                         }
@@ -1168,7 +1181,7 @@
                                     </UCard>
                                     <UCard title="7枚形" color={uColor7}>
                                         <div className="flex gap-2 mb-2">
-                                            <UBtn label="19問" locked={!unlocked7} exploding={justUnlockedDrill === '7' && unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
+                                            <UBtn label="19問" locked={!unlocked7} exploding={justUnlockedDrill === '7_ura' && unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
                                         </div>
                                         <UBest score={bestScore7} drill="7" color={uColor7} elapsed={bestElapsed7} />
                                     </UCard>
@@ -1245,7 +1258,7 @@
                 const color7  = { border: 'border-emerald-200', bg: 'bg-emerald-50', title: 'text-emerald-900', sub: 'text-emerald-500', btn1: 'bg-emerald-500 hover:bg-emerald-600', btn2: 'btn-orange', bestBg: 'bg-white border border-emerald-100' };
                 const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'btn-orange', bestBg: 'bg-white border border-violet-100' };
 
-                const unlocked10 = isRankSOrAbove(bestScore7, '7');
+                const unlocked10 = isRankAOrAbove(bestScore7, '7');
                 const exploding10 = justUnlockedDrill === '7' && unlocked10;
 
                 return (
@@ -1328,7 +1341,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-slate-500 font-bold text-center">🔓 7枚形 S ランク以上で解放</div>
+                                        <div className="text-xs text-slate-500 font-bold text-center">🔓 7枚形 A ランク以上で解放</div>
                                     </>}
                                 />
                                 </div>
