@@ -1026,12 +1026,14 @@
                             setTimeout(() => setUraLockMsg(null), 2000);
                         } : onClick}
                         className={`flex-1 py-5 rounded-xl font-bold text-sm transition-all active:scale-95 relative overflow-hidden ${
-                            locked ? 'bg-slate-200 text-slate-400' : `${color.btn2}`
+                            locked ? 'text-transparent' : `${color.btn2}`
                         }`}
                     >
                         {locked && (
-                            <div className="absolute inset-0 bg-slate-200 flex items-center justify-center text-lg">
-                                🔒
+                            <div className="absolute inset-0 rounded-xl overflow-hidden flex flex-col items-center justify-center gap-0.5"
+                                style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
+                                <div className="text-white font-black text-sm drop-shadow-md">{label}</div>
+                                <div className="text-yellow-200 font-bold text-[10px]">Sランク以上で解放</div>
                             </div>
                         )}
                         {label}
@@ -1199,7 +1201,7 @@
                                         </>}
                                     />
                                 </div>
-                                <DrillCard d="10" title="10枚形" color={unlocked10 ? color10 : { border: 'border-slate-200', bg: 'bg-slate-50', title: 'text-slate-400' }}
+                                <DrillCard d="10" title="10枚形" color={unlocked10 ? color10 : { border: 'border-yellow-400', bg: 'bg-white', title: 'text-slate-700' }}
                                     buttons={unlocked10 ? <>
                                         <div className="flex gap-2 mb-3">
                                             <button onClick={() => startNewGame('timeattack', '10', 20)}
@@ -1216,10 +1218,21 @@
                                             <BestBadge score={bestScore10_all} drill="10" qCount={80} color={color10} elapsed={bestElapsed10_all} />
                                         </div>
                                     </> : <>
-                                        <div className="flex flex-col items-center justify-center py-3 gap-1">
-                                            <div className="text-2xl">🔒</div>
-                                            <div className="text-xs text-slate-400 font-bold text-center">7枚形で S ランク以上で解放</div>
+                                        <div className="flex gap-2 mb-2">
+                                            <div className="flex-1 rounded-xl overflow-hidden"
+                                                style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
+                                                <div className="flex flex-col items-center justify-center py-4 gap-0.5">
+                                                    <div className="text-white font-black text-sm drop-shadow-md">ランダム20問</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1 rounded-xl overflow-hidden"
+                                                style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
+                                                <div className="flex flex-col items-center justify-center py-4 gap-0.5">
+                                                    <div className="text-white font-black text-sm drop-shadow-md">全80問</div>
+                                                </div>
+                                            </div>
                                         </div>
+                                        <div className="text-xs text-slate-500 font-bold text-center">🔓 7枚形 S ランク以上で解放</div>
                                     </>}
                                 />
                             </div>
