@@ -83,6 +83,20 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
+        @keyframes stripe-explode {
+            0%   { transform: translateX(0) scale(1) rotate(0deg);    opacity: 1; filter: brightness(1); }
+            8%   { transform: translateX(-5px) scale(1.02) rotate(-1.5deg);  filter: brightness(1.3); }
+            16%  { transform: translateX(5px)  scale(1.04) rotate(2deg);    filter: brightness(1.6); }
+            24%  { transform: translateX(-4px) scale(1.07) rotate(-2.5deg); filter: brightness(2); }
+            32%  { transform: translateX(3px)  scale(1.09) rotate(3deg);    filter: brightness(2.5); }
+            42%  { transform: scale(1.12) rotate(0deg);                      filter: brightness(3.5); }
+            60%  { transform: scale(1.5)  rotate(4deg);   opacity: 0.55; filter: brightness(4) saturate(3); }
+            80%  { transform: scale(1.9)  rotate(-3deg);  opacity: 0.15; }
+            100% { transform: scale(2.8)  rotate(6deg);   opacity: 0;    }
+        }
+        .stripe-explode-anim {
+            animation: stripe-explode 0.9s ease-out forwards;
+        }
 
         /* === オレンジボタン（グラデーション＋立体感）=== */
         .btn-orange {
@@ -504,6 +518,7 @@
             const [uraGameOver, setUraGameOver] = useState(false);
             const [uraLockMsg, setUraLockMsg] = useState(null);
             const [unlockMsg, setUnlockMsg] = useState(null);
+            const [justUnlockedDrill, setJustUnlockedDrill] = useState(null); // 爆破アニメ用
 
             // 結果演出（案C：カウントアップ）
             const [countScore, setCountScore] = useState(0);
@@ -816,7 +831,11 @@
                         else if (drill === '7')                         msg = '裏モード「7枚形」& 10枚形';
                         else if (drill === '10' && questionCount === 20) msg = '裏モード「ランダム20問」';
                         else if (drill === '10')                         msg = '裏モード「全80問」';
-                        if (msg) setUnlockMsg(msg);
+                        if (msg) {
+                            setUnlockMsg(msg);
+                            // ホーム画面で爆破する対象カード（表モードで解放されるもの）
+                            if (drill === '7') setJustUnlockedDrill('10_front');
+                        }
                     }
                 }
                 setIsFinished(true);
@@ -1176,6 +1195,7 @@
                 const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'btn-orange', bestBg: 'bg-white border border-violet-100' };
 
                 const unlocked10 = isRankSOrAbove(bestScore7, '7');
+                const exploding10 = justUnlockedDrill === '10_front' && unlocked10;
 
                 return (
                     <div className="h-screen overflow-hidden flex items-center justify-center p-4">
@@ -1215,6 +1235,17 @@
                                         </>}
                                     />
                                 </div>
+                                <div className="relative">
+                                {exploding10 && (
+                                    <div className="absolute inset-0 z-10 rounded-2xl overflow-hidden pointer-events-none stripe-explode-anim"
+                                        onAnimationEnd={() => setJustUnlockedDrill(null)}>
+                                        <div className="w-full h-full flex flex-col items-center justify-center gap-1"
+                                            style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
+                                            <div className="text-white font-black text-sm drop-shadow-md">ランダム20問</div>
+                                            <div className="text-white font-black text-sm drop-shadow-md">全80問</div>
+                                        </div>
+                                    </div>
+                                )}
                                 <DrillCard d="10" title="10枚形" color={unlocked10 ? color10 : { border: 'border-yellow-400', bg: 'bg-white', title: 'text-slate-700' }}
                                     buttons={unlocked10 ? <>
                                         <div className="flex gap-2 mb-3">
@@ -1249,6 +1280,7 @@
                                         <div className="text-xs text-slate-500 font-bold text-center">🔓 7枚形 S ランク以上で解放</div>
                                     </>}
                                 />
+                                </div>
                             </div>
 
                             <hr className="border-slate-200 mt-3" />
