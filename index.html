@@ -97,6 +97,16 @@
         .stripe-explode-anim {
             animation: stripe-explode 0.9s ease-out forwards;
         }
+        @keyframes hanko-press {
+            0%   { transform: rotate(-8deg) scale(2.2) translateY(-12px); opacity: 0; filter: blur(3px); }
+            45%  { transform: rotate(-8deg) scale(0.88) translateY(3px);  opacity: 1; filter: blur(0); }
+            62%  { transform: rotate(-8deg) scale(1.06) translateY(-1px); }
+            78%  { transform: rotate(-8deg) scale(0.97) translateY(1px);  }
+            100% { transform: rotate(-8deg) scale(1)   translateY(0);     opacity: 1; }
+        }
+        .hanko-press-anim {
+            animation: hanko-press 0.55s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
 
         /* === オレンジボタン（グラデーション＋立体感）=== */
         .btn-orange {
@@ -203,8 +213,34 @@
                 osc.start(now); osc.stop(now + 0.05);
             },
             playLevelUp() {
-                const audio = new Audio('きらーん1.mp3');
-                audio.play().catch(() => {});
+                this.init();
+                const ctx = this.ctx;
+                const now = ctx.currentTime;
+                // 上昇するアルペジオ（ド・ミ・ソ・高ド）
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, i) => {
+                    const osc  = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.1);
+                    gain.gain.setValueAtTime(0, now + i * 0.1);
+                    gain.gain.linearRampToValueAtTime(0.18, now + i * 0.1 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.35);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now + i * 0.1);
+                    osc.stop(now + i * 0.1 + 0.4);
+                });
+                // 最後にキラっとする高音
+                const shine  = ctx.createOscillator();
+                const sGain  = ctx.createGain();
+                shine.type = 'sine';
+                shine.frequency.setValueAtTime(2093, now + 0.45);
+                shine.frequency.exponentialRampToValueAtTime(2637, now + 0.65);
+                sGain.gain.setValueAtTime(0.12, now + 0.45);
+                sGain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+                shine.connect(sGain); sGain.connect(ctx.destination);
+                shine.start(now + 0.45);
+                shine.stop(now + 0.8);
             }
         };
 
@@ -465,14 +501,14 @@
             if (size === 'sm') {
                 return (
                     <div className="flex items-baseline justify-center gap-1">
-                        <span className={`text-lg font-black italic ${br.color}`}>{br.rank}</span>
+                        <span className={`text-lg font-black italic pr-1 ${br.color}`}>{br.rank}</span>
                         <span className="text-lg font-black text-slate-700">{score}<span className="text-xs ml-0.5">pt</span></span>
                     </div>
                 );
             }
             return (
                 <div className="flex items-baseline justify-center gap-2">
-                    <span className={`text-2xl font-black italic ${br.color}`}>{br.rank}</span>
+                    <span className={`text-2xl font-black italic pr-1.5 ${br.color}`}>{br.rank}</span>
                     <span className="text-2xl font-black text-slate-700">{score}<span className="text-xs ml-1">pt</span></span>
                 </div>
             );
@@ -525,6 +561,7 @@
             const [showRank, setShowRank] = useState(false);
             const [showComment, setShowComment] = useState(false);
             const [showFlash, setShowFlash] = useState(false);
+            const [showStamp, setShowStamp] = useState(false);
 
             // 全スートの牌画像プリロード
             useEffect(() => {
@@ -545,6 +582,7 @@
                 setShowRank(false);
                 setShowComment(false);
                 setShowFlash(false);
+                setShowStamp(false);
                 const duration = 1400;
                 const start = performance.now();
                 let rafId;
@@ -560,6 +598,7 @@
                         setTimeout(() => setShowFlash(false), 400);
                         setTimeout(() => setShowRank(true), 150);
                         setTimeout(() => setShowComment(true), 400);
+                        setTimeout(() => setShowStamp(true), 420);
                     }
                 }
                 rafId = requestAnimationFrame(update);
@@ -833,8 +872,11 @@
                         else if (drill === '10')                         msg = '裏モード「全80問」';
                         if (msg) {
                             setUnlockMsg(msg);
-                            // ホーム画面で爆破する対象カード（表モードで解放されるもの）
-                            if (drill === '7') setJustUnlockedDrill('10_front');
+                            // ホーム画面で爆破するカード（表：10枚形 / 裏：各ボタン）
+                            if (drill === '6')                               setJustUnlockedDrill('6');
+                            else if (drill === '7')                          setJustUnlockedDrill('7');
+                            else if (drill === '10' && questionCount === 20)  setJustUnlockedDrill('10_20');
+                            else if (drill === '10')                          setJustUnlockedDrill('10_80');
                         }
                     }
                 }
@@ -1052,7 +1094,7 @@
                         {children}
                     </div>
                 );
-                const UBtn = ({ label, onClick, locked, color }) => (
+                const UBtn = ({ label, onClick, locked, color, exploding }) => (
                     <button
                         onClick={locked ? () => {
                             setUraLockMsg('解放条件Sを満たしていません');
@@ -1067,6 +1109,15 @@
                                 style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
                                 <div className="text-white font-black text-sm drop-shadow-md">{label}</div>
                                 <div className="text-yellow-200 font-bold text-[10px]">Sランク以上で解放</div>
+                            </div>
+                        )}
+                        {!locked && exploding && (
+                            <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none stripe-explode-anim"
+                                onAnimationEnd={() => setJustUnlockedDrill(null)}>
+                                <div className="w-full h-full flex items-center justify-center"
+                                    style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
+                                    <div className="text-white font-black text-sm drop-shadow-md">{label}</div>
+                                </div>
                             </div>
                         )}
                         {label}
@@ -1111,21 +1162,21 @@
                                 <div className="grid grid-cols-2 gap-3">
                                     <UCard title="6枚形" color={uColor6}>
                                         <div className="flex gap-2 mb-2">
-                                            <UBtn label="13問" locked={!unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 13)} />
+                                            <UBtn label="13問" locked={!unlocked6} exploding={justUnlockedDrill === '6' && unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 13)} />
                                         </div>
                                         <UBest score={bestScore6} drill="6" color={uColor6} elapsed={bestElapsed6} />
                                     </UCard>
                                     <UCard title="7枚形" color={uColor7}>
                                         <div className="flex gap-2 mb-2">
-                                            <UBtn label="19問" locked={!unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
+                                            <UBtn label="19問" locked={!unlocked7} exploding={justUnlockedDrill === '7' && unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
                                         </div>
                                         <UBest score={bestScore7} drill="7" color={uColor7} elapsed={bestElapsed7} />
                                     </UCard>
                                 </div>
                                 <UCard title="10枚形" color={uColor10}>
                                     <div className="flex gap-2 mb-2">
-                                        <UBtn label="ランダム20問" locked={!unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
-                                        <UBtn label="全80問" locked={!unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 80)} />
+                                        <UBtn label="ランダム20問" locked={!unlocked10_20} exploding={justUnlockedDrill === '10_20' && unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
+                                        <UBtn label="全80問" locked={!unlocked10_all} exploding={justUnlockedDrill === '10_80' && unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 80)} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <UBest score={bestScore10_20}  drill="10" qCount={20}  color={uColor10} elapsed={bestElapsed10_20} />
@@ -1195,7 +1246,7 @@
                 const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'btn-orange', bestBg: 'bg-white border border-violet-100' };
 
                 const unlocked10 = isRankSOrAbove(bestScore7, '7');
-                const exploding10 = justUnlockedDrill === '10_front' && unlocked10;
+                const exploding10 = justUnlockedDrill === '7' && unlocked10;
 
                 return (
                     <div className="h-screen overflow-hidden flex items-center justify-center p-4">
@@ -1358,14 +1409,35 @@
                             <div className="text-xs font-bold text-slate-400 mb-1">{drillLabel}</div>
                             <h2 className="text-2xl font-bold mb-2 text-slate-800">結果発表</h2>
 
-                            {/* ランク：カウントアップ後にフェードイン */}
-                            <div className={`text-7xl font-black mb-2 italic ${rankInfo.color}`}
-                                style={{opacity: showRank ? 1 : 0, transform: showRank ? 'scale(1)' : 'scale(0.6)', transition: 'opacity 0.4s cubic-bezier(0.34,1.56,0.64,1), transform 0.4s cubic-bezier(0.34,1.56,0.64,1)'}}>
-                                {rankInfo.rank}
+                            {/* ランク＋ハンコ */}
+                            <div className="relative inline-flex items-center justify-center mb-2">
+                                <div className={`text-7xl font-black italic pr-3 ${rankInfo.color}`}
+                                    style={{opacity: showRank ? 1 : 0, transform: showRank ? 'scale(1)' : 'scale(0.6)', transition: 'opacity 0.4s cubic-bezier(0.34,1.56,0.64,1), transform 0.4s cubic-bezier(0.34,1.56,0.64,1)'}}>
+                                    {rankInfo.rank}
+                                </div>
+                                {isNewRecord && showStamp && (
+                                    <div className="hanko-press-anim absolute"
+                                        style={{left: '100%', top: '50%', marginTop: '-10px', marginLeft: '8px'}}>
+                                        <div style={{
+                                            width: '58px', height: '58px',
+                                            border: '3px solid #dc2626',
+                                            borderRadius: '50%',
+                                            display: 'flex', flexDirection: 'column',
+                                            alignItems: 'center', justifyContent: 'center',
+                                            color: '#dc2626', opacity: 0.82,
+                                            boxShadow: 'inset 0 0 0 2px #dc262622',
+                                            background: '#fff5f5',
+                                            gap: '1px'
+                                        }}>
+                                            <div style={{fontSize: '11px', fontWeight: 900, lineHeight: 1, letterSpacing: '0.05em'}}>記録</div>
+                                            <div style={{width: '34px', height: '1.5px', background: '#dc2626', opacity: 0.6}}></div>
+                                            <div style={{fontSize: '11px', fontWeight: 900, lineHeight: 1, letterSpacing: '0.05em'}}>更新</div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="mb-4">
-                                {isNewRecord && <div className="text-orange-500 font-black text-sm mb-1 animate-bounce">記録更新！</div>}
                                 {/* スコア：カウントアップ */}
                                 <div className="text-4xl font-black text-slate-700">{countScore} <span className="text-lg">pt</span></div>
                             </div>
@@ -1405,7 +1477,7 @@
                                     </div>
                                     <div className="flex justify-between items-center text-sm mt-1">
                                         <span className="text-slate-500 font-bold">1問あたり</span>
-                                        <span className="text-slate-400 font-mono">{(elapsedTime / problemStack.length).toFixed(1)}秒</span>
+                                        <span className="text-slate-400 font-mono">{(elapsedTime / questionCount).toFixed(1)}秒</span>
                                     </div>
                                 </div>
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center items-center">
@@ -1417,6 +1489,23 @@
                                 </div>
                             </div>
 
+                            {/* X シェアボタン */}
+                            {(() => {
+                                const perQ = (elapsedTime / questionCount).toFixed(1);
+                                const rankEmoji = rankInfo.rank === 'SSS' ? '🌈' : rankInfo.rank === 'SS' ? '✨' : rankInfo.rank === 'S' ? '🥇' : rankInfo.rank.startsWith('A') ? '🥈' : '🎴';
+                                const tweetText = `🀄 エンスクドリル｜${drillLabel}\n${rankEmoji} ${rankInfo.rank}ランク達成！ ${finalScore}pt\n1問あたり ${perQ}秒\n\n#エンスクドリル #麻雀\nhttps://tenten-ensuku.github.io/ensuku-drill/`;
+                                const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+                                return (
+                                    <a href={tweetUrl} target="_blank" rel="noopener noreferrer"
+                                        className="w-full py-3.5 mb-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors"
+                                        style={{background: '#000', color: '#fff', display: 'flex'}}>
+                                        <svg viewBox="0 0 24 24" style={{width:'16px',height:'16px',fill:'#fff',flexShrink:0}}>
+                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                        </svg>
+                                        結果をポスト
+                                    </a>
+                                );
+                            })()}
                             <button onClick={resetToHome}
                                 className="w-full py-4 bg-slate-800 text-white rounded-xl font-bold shadow-lg hover:bg-slate-700 transition-colors mb-3">
                                 メニューに戻る
