@@ -1109,41 +1109,18 @@
             }
 
             // ========== 共有コンポーネント（裏/表モード共用）==========
-            const ChainLockOverlay = ({ label, hint }) => {
-                const A = 26.57;
-                const links = [
-                    [10,5,true,A],[30,15,false,A],[50,25,true,A],[70,35,false,A],
-                    [90,45,true,A],[110,55,false,A],[130,65,true,A],[150,75,false,A],
-                    [150,5,true,-A],[130,15,false,-A],[110,25,true,-A],[90,35,false,-A],
-                    [70,45,true,-A],[50,55,false,-A],[30,65,true,-A],[10,75,false,-A],
-                ];
-                return (
-                    <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'4px'}}>
-                        <svg style={{position:'absolute',inset:0,width:'100%',height:'100%'}} viewBox="0 0 160 80" preserveAspectRatio="xMidYMid slice">
-                            <rect width="160" height="80" fill="#1a1045"/>
-                            {links.map(([cx,cy,isFlat,angle],i) => {
-                                const rx=isFlat?11:4.5, ry=isFlat?4.5:11;
-                                const t=`rotate(${angle} ${cx} ${cy})`;
-                                return (
-                                    <g key={i}>
-                                        <ellipse cx={cx} cy={cy} rx={rx} ry={ry} transform={t} fill="none" stroke="#2c3e55" strokeWidth="6"/>
-                                        <ellipse cx={cx} cy={cy} rx={rx} ry={ry} transform={t} fill="none" stroke="#7a94b0" strokeWidth="2"/>
-                                    </g>
-                                );
-                            })}
-                            <ellipse cx="80" cy="40" rx="54" ry="32" fill="rgba(10,6,42,0.75)"/>
-                        </svg>
-                        <svg className="lock-icon-anim" style={{position:'relative',zIndex:10}} width="22" height="26" viewBox="0 0 24 28" fill="none">
-                            <path d="M5 12V8.5C5 5.462 7.462 3 10.5 3H13.5C16.538 3 19 5.462 19 8.5V12" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round"/>
-                            <rect x="2" y="12" width="20" height="14" rx="3" fill="rgba(255,255,255,0.92)"/>
-                            <circle cx="12" cy="18.5" r="2.3" fill="#1a1045"/>
-                            <rect x="11" y="19.5" width="2" height="3" rx="1" fill="#1a1045"/>
-                        </svg>
-                        <div style={{position:'relative',zIndex:10,fontSize:'11px',fontWeight:900,color:'#e2e8f0'}}>{label}</div>
-                        {hint && <div style={{position:'relative',zIndex:10,fontSize:'8px',fontWeight:700,color:'#64748b'}}>{hint}</div>}
-                    </div>
-                );
-            };
+            const ChainLockOverlay = ({ label, hint }) => (
+                <div style={{position:'absolute',inset:0,background:'#475569',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'4px'}}>
+                    <svg className="lock-icon-anim" style={{position:'relative',zIndex:10}} width="22" height="26" viewBox="0 0 24 28" fill="none">
+                        <path d="M5 12V8.5C5 5.462 7.462 3 10.5 3H13.5C16.538 3 19 5.462 19 8.5V12" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round"/>
+                        <rect x="2" y="12" width="20" height="14" rx="3" fill="rgba(255,255,255,0.92)"/>
+                        <circle cx="12" cy="18.5" r="2.3" fill="#475569"/>
+                        <rect x="11" y="19.5" width="2" height="3" rx="1" fill="#475569"/>
+                    </svg>
+                    <div style={{fontSize:'11px',fontWeight:900,color:'#e2e8f0'}}>{label}</div>
+                    {hint && <div style={{fontSize:'8px',fontWeight:700,color:'#cbd5e1'}}>{hint}</div>}
+                </div>
+            );
 
             // ========== 裏モードホーム画面 ==========
             if (!drill && uraMode) {
