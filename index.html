@@ -598,7 +598,15 @@
             const [uraGameOver, setUraGameOver] = useState(false);
             const [uraLockMsg, setUraLockMsg] = useState(null);
             const [unlockMsg, setUnlockMsg] = useState(null);
-            const [justUnlockedDrill, setJustUnlockedDrill] = useState(null); // 爆破アニメ用
+            const [justUnlockedDrill, setJustUnlockedDrill] = useState(null); // 解放アニメ用
+
+            // 解放アニメ完了後の確実なクリーンアップ（1.7秒のアニメに +200ms バッファ）
+            useEffect(() => {
+                if (!justUnlockedDrill) return;
+                const t = setTimeout(() => setJustUnlockedDrill(null), 1900);
+                return () => clearTimeout(t);
+            }, [justUnlockedDrill]);
+
 
             // 結果演出（案C：カウントアップ）
             const [countScore, setCountScore] = useState(0);
@@ -1178,8 +1186,7 @@
                         {locked && <ChainLockOverlay label={label} hint="Sランク以上で解放"/>}
                         {!locked && exploding && (
                             <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none unlock-fade-anim z-10"
-                                style={{background: '#475569'}}
-                                onAnimationEnd={(e) => { if (e.animationName === 'unlock-fade') setJustUnlockedDrill(null); }}>
+                                style={{background: '#475569'}}>
                                 <svg viewBox="0 0 80 40" className="absolute inset-0 w-full h-full"
                                     preserveAspectRatio="xMidYMid meet" style={{overflow:'visible'}}>
                                     <g className="lock-shake-anim">
@@ -1372,8 +1379,7 @@
                                 <div className="relative">
                                 {exploding10 && (
                                     <div className="absolute inset-0 z-10 rounded-2xl overflow-hidden pointer-events-none unlock-fade-anim"
-                                        style={{background: '#475569'}}
-                                        onAnimationEnd={(e) => { if (e.animationName === 'unlock-fade') setJustUnlockedDrill(null); }}>
+                                        style={{background: '#475569'}}>
                                         <svg viewBox="0 0 80 60" className="absolute inset-0 w-full h-full"
                                             preserveAspectRatio="xMidYMid meet" style={{overflow:'visible'}}>
                                             <g className="lock-shake-anim">
