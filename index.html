@@ -97,6 +97,17 @@
         .stripe-explode-anim {
             animation: stripe-explode 0.9s ease-out forwards;
         }
+        @keyframes lock-pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            30%       { transform: scale(1.1) rotate(-4deg); }
+            60%       { transform: scale(1.1) rotate(4deg); }
+        }
+        .lock-icon-anim { animation: lock-pulse 3s ease-in-out infinite; display: inline-block; }
+        @keyframes chain-shift {
+            0%   { background-position: 0 0; }
+            100% { background-position: 20px 20px; }
+        }
+        .chain-lock-anim { animation: chain-shift 3s linear infinite; }
         @keyframes hanko-press {
             0%   { transform: rotate(-8deg) scale(2.2) translateY(-12px); opacity: 0; filter: blur(3px); }
             45%  { transform: rotate(-8deg) scale(0.88) translateY(3px);  opacity: 1; filter: blur(0); }
@@ -1118,10 +1129,19 @@
                         }`}
                     >
                         {locked && (
-                            <div className="absolute inset-0 rounded-xl overflow-hidden flex flex-col items-center justify-center gap-0.5"
-                                style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
-                                <div className="text-white font-black text-sm drop-shadow-md">{label}</div>
-                                <div className="text-yellow-200 font-bold text-[10px]">Sランク以上で解放</div>
+                            <div className="chain-lock-anim absolute inset-0 rounded-xl overflow-hidden flex flex-col items-center justify-center"
+                                style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect width='20' height='20' fill='%230f172a'/%3E%3Cellipse cx='5' cy='5' rx='4' ry='2.5' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='15' cy='5' rx='2.5' ry='4' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='5' cy='15' rx='2.5' ry='4' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='15' cy='15' rx='4' ry='2.5' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3C/svg%3E\")",backgroundSize:'20px 20px'}}>
+                                <div className="absolute inset-0" style={{background:'rgba(15,23,42,0.5)'}} />
+                                <div style={{position:'relative',zIndex:10,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px'}}>
+                                    <svg className="lock-icon-anim" width="24" height="28" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 12V8.5C5 5.462 7.462 3 10.5 3H13.5C16.538 3 19 5.462 19 8.5V12" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round"/>
+                                        <rect x="2" y="12" width="20" height="14" rx="3" fill="rgba(255,255,255,0.92)"/>
+                                        <circle cx="12" cy="18.5" r="2.3" fill="#0f172a"/>
+                                        <rect x="11" y="19.5" width="2" height="3" rx="1" fill="#0f172a"/>
+                                    </svg>
+                                    <div className="text-white font-black text-xs">{label}</div>
+                                    <div style={{fontSize:'9px',color:'#94a3b8',fontWeight:700}}>Sランク以上で解放</div>
+                                </div>
                             </div>
                         )}
                         {!locked && exploding && (
@@ -1328,16 +1348,30 @@
                                         </div>
                                     </> : <>
                                         <div className="flex gap-2 mb-2">
-                                            <div className="flex-1 rounded-xl overflow-hidden"
-                                                style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
-                                                <div className="flex flex-col items-center justify-center py-4 gap-0.5">
-                                                    <div className="text-white font-black text-sm drop-shadow-md">ランダム20問</div>
+                                            <div className="chain-lock-anim flex-1 rounded-xl overflow-hidden flex flex-col items-center justify-center py-4 relative"
+                                                style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect width='20' height='20' fill='%230f172a'/%3E%3Cellipse cx='5' cy='5' rx='4' ry='2.5' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='15' cy='5' rx='2.5' ry='4' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='5' cy='15' rx='2.5' ry='4' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='15' cy='15' rx='4' ry='2.5' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3C/svg%3E\")",backgroundSize:'20px 20px'}}>
+                                                <div className="absolute inset-0" style={{background:'rgba(15,23,42,0.5)'}} />
+                                                <div style={{position:'relative',zIndex:10,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px'}}>
+                                                    <svg className="lock-icon-anim" width="22" height="26" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M5 12V8.5C5 5.462 7.462 3 10.5 3H13.5C16.538 3 19 5.462 19 8.5V12" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round"/>
+                                                        <rect x="2" y="12" width="20" height="14" rx="3" fill="rgba(255,255,255,0.92)"/>
+                                                        <circle cx="12" cy="18.5" r="2.3" fill="#0f172a"/>
+                                                        <rect x="11" y="19.5" width="2" height="3" rx="1" fill="#0f172a"/>
+                                                    </svg>
+                                                    <div className="text-white font-black text-xs">ランダム20問</div>
                                                 </div>
                                             </div>
-                                            <div className="flex-1 rounded-xl overflow-hidden"
-                                                style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
-                                                <div className="flex flex-col items-center justify-center py-4 gap-0.5">
-                                                    <div className="text-white font-black text-sm drop-shadow-md">全80問</div>
+                                            <div className="chain-lock-anim flex-1 rounded-xl overflow-hidden flex flex-col items-center justify-center py-4 relative"
+                                                style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect width='20' height='20' fill='%230f172a'/%3E%3Cellipse cx='5' cy='5' rx='4' ry='2.5' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='15' cy='5' rx='2.5' ry='4' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='5' cy='15' rx='2.5' ry='4' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3Cellipse cx='15' cy='15' rx='4' ry='2.5' fill='none' stroke='%23334155' stroke-width='1.8'/%3E%3C/svg%3E\")",backgroundSize:'20px 20px'}}>
+                                                <div className="absolute inset-0" style={{background:'rgba(15,23,42,0.5)'}} />
+                                                <div style={{position:'relative',zIndex:10,display:'flex',flexDirection:'column',alignItems:'center',gap:'3px'}}>
+                                                    <svg className="lock-icon-anim" width="22" height="26" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M5 12V8.5C5 5.462 7.462 3 10.5 3H13.5C16.538 3 19 5.462 19 8.5V12" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round"/>
+                                                        <rect x="2" y="12" width="20" height="14" rx="3" fill="rgba(255,255,255,0.92)"/>
+                                                        <circle cx="12" cy="18.5" r="2.3" fill="#0f172a"/>
+                                                        <rect x="11" y="19.5" width="2" height="3" rx="1" fill="#0f172a"/>
+                                                    </svg>
+                                                    <div className="text-white font-black text-xs">全80問</div>
                                                 </div>
                                             </div>
                                         </div>
