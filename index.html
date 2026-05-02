@@ -597,15 +597,30 @@
             const [uraMode, setUraMode] = useState(false);
             const [uraGameOver, setUraGameOver] = useState(false);
             const [uraLockMsg, setUraLockMsg] = useState(null);
-            const [unlockMsg, setUnlockMsg] = useState(null);
-            const [justUnlockedDrill, setJustUnlockedDrill] = useState(null); // 解放アニメ用
+            const [justUnlockedDrills, setJustUnlockedDrills] = useState([]); // 解放アニメ用（配列で複数同時対応）
+            const [pendingUnlocks, setPendingUnlocks] = useState([]);          // ホーム画面到達時に発火させる未消化分
 
             // 解放アニメ完了後の確実なクリーンアップ（1.7秒のアニメに +200ms バッファ）
             useEffect(() => {
-                if (!justUnlockedDrill) return;
-                const t = setTimeout(() => setJustUnlockedDrill(null), 1900);
+                if (justUnlockedDrills.length === 0) return;
+                const t = setTimeout(() => setJustUnlockedDrills([]), 1900);
                 return () => clearTimeout(t);
-            }, [justUnlockedDrill]);
+            }, [justUnlockedDrills]);
+
+            // ホーム画面到達時に該当する解放アニメを発火
+            // '7'        → 表モード10枚形（uraMode=false で発火）
+            // '6','7_ura','10_20','10_80' → 裏モード（uraMode=true で発火）
+            useEffect(() => {
+                if (drill !== null) return;            // 何かのドリル中はスキップ
+                if (pendingUnlocks.length === 0) return;
+                const tableKeys = ['7'];
+                const uraKeys   = ['6', '7_ura', '10_20', '10_80'];
+                const targetKeys = uraMode ? uraKeys : tableKeys;
+                const fire   = pendingUnlocks.filter(u => targetKeys.includes(u));
+                if (fire.length === 0) return;
+                setJustUnlockedDrills(fire);
+                setPendingUnlocks(prev => prev.filter(u => !fire.includes(u)));
+            }, [drill, uraMode, pendingUnlocks]);
 
 
             // 結果演出（案C：カウントアップ）
@@ -758,7 +773,6 @@
                 setQuestionCount(null);
                 setProblemStack([]);
                 setIsFinished(false);
-                setUnlockMsg(null);
             };
 
             useEffect(() => {
@@ -918,31 +932,25 @@
                     setIsNewRecord(true);
                     SoundEffect.playLevelUp();
 
+                    // 解放対象を集約（複数同時解放に対応）
+                    const newUnlocks = [];
                     // 表モード10枚形：7枚形Aランク達成で解放
                     if (drill === '7') {
                         const wasLocked10 = !isRankAOrAbove(currentBest, '7');
                         const nowUnlocked10 = isRankAOrAbove(score, '7');
-                        if (wasLocked10 && nowUnlocked10) {
-                            setUnlockMsg('表モード「10枚形」');
-                            setJustUnlockedDrill('7');
-                        }
+                        if (wasLocked10 && nowUnlocked10) newUnlocks.push('7');
                     }
                     // 裏モード：Sランク達成で解放
                     const wasLockedS = !isRankSOrAbove(currentBest, drill, questionCount);
                     const nowUnlockedS = isRankSOrAbove(score, drill, questionCount);
                     if (wasLockedS && nowUnlockedS) {
-                        let msg = '';
-                        if (drill === '6')                               msg = '裏モード「6枚形」';
-                        else if (drill === '7')                          msg = '裏モード「7枚形」';
-                        else if (drill === '10' && questionCount === 20) msg = '裏モード「ランダム20問」';
-                        else if (drill === '10')                         msg = '裏モード「全80問」';
-                        if (msg) {
-                            setUnlockMsg(msg);
-                            if (drill === '6')                               setJustUnlockedDrill('6');
-                            else if (drill === '7')                          setJustUnlockedDrill('7_ura');
-                            else if (drill === '10' && questionCount === 20)  setJustUnlockedDrill('10_20');
-                            else if (drill === '10')                          setJustUnlockedDrill('10_80');
-                        }
+                        if (drill === '6')                                newUnlocks.push('6');
+                        else if (drill === '7')                           newUnlocks.push('7_ura');
+                        else if (drill === '10' && questionCount === 20)  newUnlocks.push('10_20');
+                        else if (drill === '10')                          newUnlocks.push('10_80');
+                    }
+                    if (newUnlocks.length > 0) {
+                        setPendingUnlocks(prev => [...prev, ...newUnlocks]);
                     }
                 }
                 setIsFinished(true);
@@ -1144,6 +1152,33 @@
             }
 
             // ========== 共有コンポーネント（裏/表モード共用）==========
+            const UnlockKeyAnim = ({ label, isLargePanel }) => (
+                <div className={`absolute inset-0 ${isLargePanel ? 'rounded-2xl' : 'rounded-xl'} overflow-hidden pointer-events-none unlock-fade-anim z-10`}
+                    style={{background: '#475569'}}>
+                    <svg viewBox="0 0 80 40" className="absolute inset-0 w-full h-full"
+                        preserveAspectRatio="xMidYMid meet" style={{overflow:'visible'}}>
+                        <g className="lock-shake-anim">
+                            <path d="M28 15V11.5C28 8.462 30.462 6 33.5 6H36.5C39.538 6 42 8.462 42 11.5V15"
+                                stroke="white" strokeWidth="2.2" fill="none" strokeLinecap="round"
+                                className="shackle-pop-anim"/>
+                            <rect x="25" y="15" width="20" height="13" rx="3" fill="white"/>
+                            <circle cx="35" cy="22" r="2.2" fill="#475569"/>
+                            <rect x="34" y="23" width="2" height="2.8" rx="1" fill="#475569"/>
+                        </g>
+                        <g className="key-action-anim" style={{transformOrigin:'35px 22px'}}>
+                            <rect x="35" y="20.5" width="22" height="3" fill="#fbbf24" stroke="#854d0e" strokeWidth="0.5"/>
+                            <rect x="35" y="23.5" width="3" height="2.8" fill="#fbbf24"/>
+                            <rect x="40" y="23.5" width="2" height="2.3" fill="#fbbf24"/>
+                            <circle cx="62" cy="22" r="5" fill="#fbbf24" stroke="#854d0e" strokeWidth="1"/>
+                            <circle cx="62" cy="22" r="2" fill="none" stroke="#854d0e" strokeWidth="1"/>
+                        </g>
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center label-appear-anim">
+                        <div className="text-white font-black text-sm drop-shadow-md">{label}</div>
+                    </div>
+                </div>
+            );
+
             const ChainLockOverlay = ({ label, hint }) => (
                 <div style={{position:'absolute',inset:0,background:'#475569',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'4px'}}>
                     <svg className="lock-icon-anim" style={{position:'relative',zIndex:10}} width="22" height="26" viewBox="0 0 24 28" fill="none">
@@ -1184,32 +1219,7 @@
                         }`}
                     >
                         {locked && <ChainLockOverlay label={label} hint="Sランク以上で解放"/>}
-                        {!locked && exploding && (
-                            <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none unlock-fade-anim z-10"
-                                style={{background: '#475569'}}>
-                                <svg viewBox="0 0 80 40" className="absolute inset-0 w-full h-full"
-                                    preserveAspectRatio="xMidYMid meet" style={{overflow:'visible'}}>
-                                    <g className="lock-shake-anim">
-                                        <path d="M28 15V11.5C28 8.462 30.462 6 33.5 6H36.5C39.538 6 42 8.462 42 11.5V15"
-                                            stroke="white" strokeWidth="2.2" fill="none" strokeLinecap="round"
-                                            className="shackle-pop-anim"/>
-                                        <rect x="25" y="15" width="20" height="13" rx="3" fill="white"/>
-                                        <circle cx="35" cy="22" r="2.2" fill="#475569"/>
-                                        <rect x="34" y="23" width="2" height="2.8" rx="1" fill="#475569"/>
-                                    </g>
-                                    <g className="key-action-anim" style={{transformOrigin:'35px 22px'}}>
-                                        <rect x="35" y="20.5" width="22" height="3" fill="#fbbf24" stroke="#854d0e" strokeWidth="0.5"/>
-                                        <rect x="35" y="23.5" width="3" height="2.8" fill="#fbbf24"/>
-                                        <rect x="40" y="23.5" width="2" height="2.3" fill="#fbbf24"/>
-                                        <circle cx="62" cy="22" r="5" fill="#fbbf24" stroke="#854d0e" strokeWidth="1"/>
-                                        <circle cx="62" cy="22" r="2" fill="none" stroke="#854d0e" strokeWidth="1"/>
-                                    </g>
-                                </svg>
-                                <div className="absolute inset-0 flex items-center justify-center label-appear-anim">
-                                    <div className="text-white font-black text-sm drop-shadow-md">{label}</div>
-                                </div>
-                            </div>
-                        )}
+                        {!locked && exploding && <UnlockKeyAnim label={label}/>}
                         {label}
                     </button>
                 );
@@ -1252,21 +1262,21 @@
                                 <div className="grid grid-cols-2 gap-3">
                                     <UCard title="6枚形" color={uColor6}>
                                         <div className="flex gap-2 mb-2">
-                                            <UBtn label="13問" locked={!unlocked6} exploding={justUnlockedDrill === '6' && unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 13)} />
+                                            <UBtn label="13問" locked={!unlocked6} exploding={justUnlockedDrills.includes('6') && unlocked6} color={uColor6} onClick={() => startNewGame('ura', '6', 13)} />
                                         </div>
                                         <UBest score={bestScore6} drill="6" color={uColor6} elapsed={bestElapsed6} />
                                     </UCard>
                                     <UCard title="7枚形" color={uColor7}>
                                         <div className="flex gap-2 mb-2">
-                                            <UBtn label="19問" locked={!unlocked7} exploding={justUnlockedDrill === '7_ura' && unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
+                                            <UBtn label="19問" locked={!unlocked7} exploding={justUnlockedDrills.includes('7_ura') && unlocked7} color={uColor7} onClick={() => startNewGame('ura', '7', 19)} />
                                         </div>
                                         <UBest score={bestScore7} drill="7" color={uColor7} elapsed={bestElapsed7} />
                                     </UCard>
                                 </div>
                                 <UCard title="10枚形" color={uColor10}>
                                     <div className="flex gap-2 mb-2">
-                                        <UBtn label="ランダム20問" locked={!unlocked10_20} exploding={justUnlockedDrill === '10_20' && unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
-                                        <UBtn label="全80問" locked={!unlocked10_all} exploding={justUnlockedDrill === '10_80' && unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 80)} />
+                                        <UBtn label="ランダム20問" locked={!unlocked10_20} exploding={justUnlockedDrills.includes('10_20') && unlocked10_20} color={uColor10} onClick={() => startNewGame('ura', '10', 20)} />
+                                        <UBtn label="全80問" locked={!unlocked10_all} exploding={justUnlockedDrills.includes('10_80') && unlocked10_all} color={uColor10} onClick={() => startNewGame('ura', '10', 80)} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <UBest score={bestScore10_20}  drill="10" qCount={20}  color={uColor10} elapsed={bestElapsed10_20} />
@@ -1336,7 +1346,7 @@
                 const color10 = { border: 'border-violet-200',  bg: 'bg-violet-50',  title: 'text-violet-900',  sub: 'text-violet-500',  btn1: 'bg-violet-500 hover:bg-violet-600',  btn2: 'btn-orange', bestBg: 'bg-white border border-violet-100' };
 
                 const unlocked10 = isRankAOrAbove(bestScore7, '7');
-                const exploding10 = justUnlockedDrill === '7' && unlocked10;
+                const exploding10 = justUnlockedDrills.includes('7') && unlocked10;
 
                 return (
                     <div className="min-h-screen scroll-screen flex items-start justify-center p-4 py-6">
@@ -1377,44 +1387,23 @@
                                     />
                                 </div>
                                 <div className="relative">
-                                {exploding10 && (
-                                    <div className="absolute inset-0 z-10 rounded-2xl overflow-hidden pointer-events-none unlock-fade-anim"
-                                        style={{background: '#475569'}}>
-                                        <svg viewBox="0 0 80 60" className="absolute inset-0 w-full h-full"
-                                            preserveAspectRatio="xMidYMid meet" style={{overflow:'visible'}}>
-                                            <g className="lock-shake-anim">
-                                                <path d="M28 25V21.5C28 18.462 30.462 16 33.5 16H36.5C39.538 16 42 18.462 42 21.5V25"
-                                                    stroke="white" strokeWidth="2.2" fill="none" strokeLinecap="round"
-                                                    className="shackle-pop-anim"/>
-                                                <rect x="25" y="25" width="20" height="13" rx="3" fill="white"/>
-                                                <circle cx="35" cy="32" r="2.2" fill="#475569"/>
-                                                <rect x="34" y="33" width="2" height="2.8" rx="1" fill="#475569"/>
-                                            </g>
-                                            <g className="key-action-anim" style={{transformOrigin:'35px 32px'}}>
-                                                <rect x="35" y="30.5" width="22" height="3" fill="#fbbf24" stroke="#854d0e" strokeWidth="0.5"/>
-                                                <rect x="35" y="33.5" width="3" height="2.8" fill="#fbbf24"/>
-                                                <rect x="40" y="33.5" width="2" height="2.3" fill="#fbbf24"/>
-                                                <circle cx="62" cy="32" r="5" fill="#fbbf24" stroke="#854d0e" strokeWidth="1"/>
-                                                <circle cx="62" cy="32" r="2" fill="none" stroke="#854d0e" strokeWidth="1"/>
-                                            </g>
-                                        </svg>
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 label-appear-anim">
-                                            <div className="text-white font-black text-sm drop-shadow-md">ランダム20問</div>
-                                            <div className="text-white font-black text-sm drop-shadow-md">全80問</div>
-                                        </div>
-                                    </div>
-                                )}
                                 <DrillCard d="10" title="10枚形" color={unlocked10 ? color10 : { border: 'border-yellow-400', bg: 'bg-white', title: 'text-slate-700' }}
                                     buttons={unlocked10 ? <>
                                         <div className="flex gap-2 mb-3">
-                                            <button onClick={() => startNewGame('timeattack', '10', 20)}
-                                                className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
-                                                ランダム20問
-                                            </button>
-                                            <button onClick={() => startNewGame('timeattack', '10', 80)}
-                                                className={`flex-1 py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
-                                                全80問
-                                            </button>
+                                            <div className="flex-1 relative rounded-xl overflow-hidden">
+                                                <button onClick={() => startNewGame('timeattack', '10', 20)}
+                                                    className={`w-full py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
+                                                    ランダム20問
+                                                </button>
+                                                {exploding10 && <UnlockKeyAnim label="ランダム20問"/>}
+                                            </div>
+                                            <div className="flex-1 relative rounded-xl overflow-hidden">
+                                                <button onClick={() => startNewGame('timeattack', '10', 80)}
+                                                    className={`w-full py-5 ${color10.btn2} rounded-xl font-bold text-sm`}>
+                                                    全80問
+                                                </button>
+                                                {exploding10 && <UnlockKeyAnim label="全80問"/>}
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <BestBadge score={bestScore10_20}  drill="10" qCount={20} color={color10} elapsed={bestElapsed10_20} />
@@ -1548,18 +1537,6 @@
                                 {rankInfo.comment}
                             </p>
 
-                            {/* 解放通知バナー */}
-                            {unlockMsg && (
-                                <div className="mb-6 mx-2 rounded-2xl overflow-hidden"
-                                    style={{animation: 'gameover-fadein 0.5s cubic-bezier(0.34,1.2,0.64,1) 0.6s both'}}>
-                                    <div style={{background: 'repeating-linear-gradient(-45deg, #fbbf24 0px, #fbbf24 8px, #1e293b 8px, #1e293b 16px)'}}>
-                                        <div className="bg-black/40 px-4 py-3 text-center">
-                                            <div className="text-yellow-300 font-black text-sm mb-0.5">🔓 S ランク達成！</div>
-                                            <div className="text-white font-bold text-xs">{unlockMsg}がプレイできるようになりました</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
 
                             <div className="grid grid-cols-2 gap-3 mb-6">
                                 {/* スコア内訳 */}
