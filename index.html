@@ -1677,7 +1677,7 @@
 
                     <div className="flex-1 p-4 flex flex-col items-center overflow-hidden">
                         {/* 牌表示（2スロット切り替えで爆速化） */}
-                        <div className="mt-3 mb-4 relative" style={{ minHeight: '120px' }}>
+                        <div className="mt-3 mb-2 relative" style={{ minHeight: '120px' }}>
                             {[0, 1].map((slot) => {
                                 const problemIndex = slot === 0
                                     ? (currentIdx % 2 === 0 ? currentIdx : currentIdx + 1)
@@ -1706,7 +1706,7 @@
                         </div>
 
                         {/* ○✕ インジケーター（1ボタンの上） */}
-                        <div className="w-full max-w-[360px] h-12 flex items-center mb-1">
+                        <div className="w-full max-w-[360px] h-8 flex items-center mb-0">
                             {lastResult && (
                                 <span style={{
                                     fontSize: '44px',
