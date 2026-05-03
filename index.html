@@ -1706,10 +1706,10 @@
                         </div>
 
                         {/* ○✕ インジケーター（1ボタンの上） */}
-                        <div className="w-full max-w-[360px] h-8 flex items-center mb-0">
+                        <div className="w-full max-w-[360px] h-8 flex items-center" style={{overflow:'visible', marginBottom:'-6px'}}>
                             {lastResult && (
                                 <span style={{
-                                    fontSize: '30px',
+                                    fontSize: '44px',
                                     fontWeight: 900,
                                     lineHeight: 1,
                                     color: lastResult === 'correct' ? '#ef4444' : '#3b82f6',
