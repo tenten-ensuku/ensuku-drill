@@ -1651,7 +1651,7 @@
             const currentProblem = problemStack[currentIdx];
             const tileCount      = currentProblem ? currentProblem.tiles.length : 6;
             const scaleClass     = tileCount >= 10 ? '' : 'scale-110 sm:scale-125';
-            const dark = false;
+            const dark = mode === 'ura';
 
             return (
                 <div className={`max-w-md mx-auto h-screen overflow-hidden flex flex-col relative ${dark ? 'bg-gray-950' : 'bg-slate-50'}`}>
