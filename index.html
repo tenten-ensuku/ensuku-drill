@@ -1655,6 +1655,8 @@
 
             return (
                 <div className={`max-w-md mx-auto h-screen overflow-hidden flex flex-col relative ${dark ? 'bg-gray-950' : 'bg-slate-50'}`}>
+                    {/* 座標キャリブレーションツール（調整完了後削除） */}
+                    <div id="calib-label" style={{position:'fixed',bottom:'10px',left:'10px',background:'rgba(0,0,0,0.85)',color:'#0f0',font:'bold 13px monospace',padding:'6px 12px',borderRadius:'6px',zIndex:9999,pointerEvents:'none'}}>タップで座標表示</div>
                     <div className={`px-4 py-3 flex justify-between items-center shadow-sm sticky top-0 z-50 ${dark ? 'bg-gray-900 border-b border-gray-700' : 'bg-white border-b border-slate-100'}`}>
                         <div className={`font-bold text-sm w-16 ${dark ? 'text-gray-400' : 'text-slate-400'}`}>{currentIdx + 1} / {problemStack.length}</div>
 
@@ -1675,7 +1677,7 @@
                         <div className="font-mono font-black text-orange-500 text-xl w-16 text-right">{elapsedTime}秒</div>
                     </div>
 
-                    <div className="flex-1 p-4 flex flex-col items-center overflow-hidden">
+                    <div className="flex-1 p-4 flex flex-col items-center overflow-hidden" onClick={(e)=>{const r=e.currentTarget.getBoundingClientRect();const x=((e.clientX-r.left)/r.width*100).toFixed(1);const y=((e.clientY-r.top)/r.height*100).toFixed(1);document.getElementById('calib-label').textContent='left:'+x+'% top:'+y+'%';}}>
                         {/* 牌表示（2スロット切り替えで爆速化） */}
                         <div className="mt-3 mb-2 relative" style={{ minHeight: '120px' }}>
                             {[0, 1].map((slot) => {
