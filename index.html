@@ -968,6 +968,7 @@
                 SoundEffect.playTap();
                 SoundEffect.init();
                 pendingStatsRef.current = null;
+                setUraGameOver(false);
                 setGameSource('favorites');
                 const stack = favorites.map(b => ({
                     tiles: b.tiles, answers: b.answers, suit: b.suit, bucketId: b.id
@@ -994,6 +995,7 @@
                 SoundEffect.init();
                 setShowReview(false);
                 pendingStatsRef.current = null;
+                setUraGameOver(false);
                 setGameSource('review');
                 const stack = reviewBucket.map(b => ({
                     tiles: b.tiles, answers: b.answers, suit: b.suit, bucketId: b.id
