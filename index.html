@@ -1675,7 +1675,7 @@
                         <div className="font-mono font-black text-orange-500 text-xl w-16 text-right">{elapsedTime}秒</div>
                     </div>
 
-                    <div className="flex-1 p-4 flex flex-col items-center overflow-hidden relative">
+                    <div className="flex-1 p-4 flex flex-col items-center overflow-hidden">
                         {/* 牌表示（2スロット切り替えで爆速化） */}
                         <div className="mt-3 mb-3 relative" style={{ minHeight: '120px' }}>
                             {[0, 1].map((slot) => {
@@ -1705,22 +1705,19 @@
                             })}
                         </div>
 
-                        {/* ○✕ インジケーター（絶対配置） */}
-                        {lastResult && (
-                            <span style={{
-                                position: 'absolute',
-                                left: '17.6%',
-                                top: '19.0%',
-                                fontSize: '44px',
-                                fontWeight: 900,
-                                lineHeight: 1,
-                                color: lastResult === 'correct' ? '#ef4444' : '#3b82f6',
-                                zIndex: 10,
-                                pointerEvents: 'none',
-                            }}>
-                                {lastResult === 'correct' ? '○' : '✕'}
-                            </span>
-                        )}
+                        {/* ○✕ インジケーター（フロー内・固定高さ） */}
+                        <div className="w-full max-w-[360px] flex items-center" style={{height:'48px', flexShrink:0}}>
+                            {lastResult && (
+                                <span style={{
+                                    fontSize: '44px',
+                                    fontWeight: 900,
+                                    lineHeight: 1,
+                                    color: lastResult === 'correct' ? '#ef4444' : '#3b82f6',
+                                }}>
+                                    {lastResult === 'correct' ? '○' : '✕'}
+                                </span>
+                            )}
+                        </div>
 
                         {/* 回答ボタン 1〜9 */}
                         <div className="grid grid-cols-3 gap-0 w-full max-w-[360px] mb-4">
