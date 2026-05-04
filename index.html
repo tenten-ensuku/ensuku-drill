@@ -593,6 +593,7 @@
             });
             const [showFavorites, setShowFavorites] = useState(false);
             const [showReview, setShowReview] = useState(false);
+            const [gameSource, setGameSource] = useState(null); // null | 'favorites' | 'review'
             const [lastResult, setLastResult] = useState(null); // null | 'correct' | 'incorrect'
             const [uraMode, setUraMode] = useState(false);
             const [uraGameOver, setUraGameOver] = useState(false);
@@ -722,11 +723,18 @@
                 return URA_RANK_ORDER.indexOf(rank) >= URA_RANK_ORDER.indexOf('A');
             };
 
+            const handleRetry = () => {
+                if (gameSource === 'favorites') { startFavoritesGame(); return; }
+                if (gameSource === 'review')    { startReviewGame();    return; }
+                startNewGame(mode, drill, questionCount);
+            };
+
             const startNewGame = (m, d, qc) => {
                 SoundEffect.playTap();
                 SoundEffect.init();
                 pendingStatsRef.current = null;
                 setUraGameOver(false);
+                setGameSource(null);
 
                 const source =
                     d === '7'  ? ALL_PROBLEMS_7  :
@@ -960,6 +968,7 @@
                 SoundEffect.playTap();
                 SoundEffect.init();
                 pendingStatsRef.current = null;
+                setGameSource('favorites');
                 const stack = favorites.map(b => ({
                     tiles: b.tiles, answers: b.answers, suit: b.suit, bucketId: b.id
                 })).sort(() => Math.random() - 0.5);
@@ -985,6 +994,7 @@
                 SoundEffect.init();
                 setShowReview(false);
                 pendingStatsRef.current = null;
+                setGameSource('review');
                 const stack = reviewBucket.map(b => ({
                     tiles: b.tiles, answers: b.answers, suit: b.suit, bucketId: b.id
                 })).sort(() => Math.random() - 0.5);
@@ -1595,7 +1605,7 @@
                                 className="w-full py-4 bg-slate-800 text-white rounded-xl font-bold shadow-lg hover:bg-slate-700 transition-colors mb-3">
                                 メニューに戻る
                             </button>
-                            <button onClick={() => startNewGame(mode, drill, questionCount)}
+                            <button onClick={handleRetry}
                                 className="w-full py-4 bg-orange-500 text-white rounded-xl font-bold shadow-lg hover:bg-orange-400 transition-colors">
                                 もう一度
                             </button>
@@ -1666,7 +1676,7 @@
                                 </svg>
                                 <span className="text-xs font-bold tracking-tighter">メニューへ</span>
                             </button>
-                            <button onClick={() => startNewGame(mode, drill, questionCount)}
+                            <button onClick={handleRetry}
                                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${dark ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}`}>
                                 <span className="text-xs font-bold tracking-tighter">🔁 リトライ</span>
                             </button>
@@ -1805,7 +1815,7 @@
                                     className="w-full py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-2xl font-black text-lg transition-all active:scale-95 mb-3">
                                     メニューに戻る
                                 </button>
-                                <button onClick={() => startNewGame(mode, drill, questionCount)}
+                                <button onClick={handleRetry}
                                     className="w-full py-4 bg-orange-500 hover:bg-orange-400 text-white rounded-2xl font-black text-lg transition-all active:scale-95">
                                     もう一度
                                 </button>
